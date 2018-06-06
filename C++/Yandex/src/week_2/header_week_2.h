@@ -1,24 +1,21 @@
 #ifndef HEADER_WEEK_2_H
 #define HEADER_WEEK_2_H
 
+#pragma once
+
 #include <string>
 #include <iostream>
 #include <cassert>
 #include <vector>
 #include <map>
 
+#include <sstream>
+#include <exception>
+#include <string>
+
 using namespace std;
 
-
 #pragma region Декомпозиция программы
-
-/*
-	В курсе «Белый пояс по С++» у нас была задача «Автобусные остановки — 1». 
-	В этой задаче вам будет дано её правильное решение, целиком содержащееся внутри функции main. 
-	Вам надо будет выполнить декомпозицию этого решения на заранее заданные блоки так, 
-	чтобы получившаяся программа так же корректно решала задачу. 
-	Условие задачи «Автобусные остановки — 1» приведено ниже.
-*/
 
 enum class QueryType {
 	NewBus,
@@ -192,5 +189,192 @@ private:
 
 #pragma endregion
 
+template<class T, class U>
+void AssertEqual(const T& t, const U& u, const string& hint = {}) {
+	if (t != u) {
+		ostringstream os;
+		os << "Assertion failed: " << t << " != " << u;
+		if (!hint.empty()) {
+			os << " hint: " << hint;
+		}
+		throw runtime_error(os.str());
+	}
+}
+
+void Assert(bool b, const string& hint) {
+	AssertEqual(b, true, hint);
+}
+
+#pragma region Тесты для класса Person
+
+class Person {
+public:
+	void ChangeFirstName(int year, const string& first_name) { }
+	void ChangeLastName(int year, const string& last_name) { }
+	string GetFullName(int year) { }
+};
+
+void TestPredefinedLastNameFirst() {
+	Person person;
+
+	person.ChangeLastName(1, "LN1");
+	person.ChangeFirstName(3, "FN1");
+
+	AssertEqual(person.GetFullName(0), "Incognito");
+	AssertEqual(person.GetFullName(2), "LN1 with unknown first name");
+	AssertEqual(person.GetFullName(4), "FN1 LN1");
+}
+
+void TestPredefined() {
+	Person person;
+
+	person.ChangeFirstName(1, "FN1");
+	person.ChangeLastName(3, "LN1");
+
+	AssertEqual(person.GetFullName(0), "Incognito");
+	AssertEqual(person.GetFullName(2), "FN1 with unknown last name");
+	AssertEqual(person.GetFullName(4), "FN1 LN1");
+
+	person.ChangeFirstName(5, "FN2");
+	AssertEqual(person.GetFullName(4), "FN1 LN1");
+	AssertEqual(person.GetFullName(5), "FN2 LN1");
+	AssertEqual(person.GetFullName(6), "FN2 LN1");
+
+	person.ChangeLastName(4, "LN2");
+	AssertEqual(person.GetFullName(3), "FN1 LN1");
+	AssertEqual(person.GetFullName(4), "FN1 LN2");
+	AssertEqual(person.GetFullName(5), "FN2 LN2");
+}
+
+#pragma endregion
+
+#pragma region Тесты для класса Rational
+
+class Rational {
+public:
+	Rational() {}
+	Rational(int numerator, int denominator) { }
+
+	int Numerator() const { }
+	int Denominator() const { }
+};
+
+void TestRational(int num, int denom, int exp_num, int exp_denom)
+{
+	ostringstream os;
+	os << num << " / " << denom << " -> " << exp_num << " / " << exp_denom << endl;
+
+	AssertEqual(Rational(num, denom).Numerator(), exp_num,		os.str() + " numerator\n");
+	AssertEqual(Rational(num, denom).Denominator(), exp_denom,  os.str() + " denominator\n");
+}
+
+void RationalTests()
+{
+	{
+		// Constructor (condition 1)
+		AssertEqual(Rational().Numerator(), 0,		"default constructor num"); 
+		AssertEqual(Rational().Denominator(), 1,	"default constructor denom");
+		// Condition 2 (From task)
+		TestRational(2, 4, 1, 2);
+		TestRational(-2, -4, 1, 2);
+		TestRational(4, 2, 2, 1);
+		TestRational(-4, -4, 2, 1);
+		TestRational(20, 6, 10, 3);
+		TestRational(-20, -6, 10, 3);
+		// Condition 3 (From task)
+		TestRational(-2, 3, -2, 3);
+		TestRational(-3, 2, -3, 2);
+		TestRational(2, -3, -2, 3);
+		TestRational(3, -2, -3, 2);
+		// Condition 4 (From task)
+		TestRational(2, 3, 2, 3);
+		TestRational(3, 2, 3, 2);
+		TestRational(-2, -3, 2, 3);
+		TestRational(-3, -2, 3, 2);
+		// Condition 5 (From task)
+		TestRational(0, 3, 0, 1);
+		TestRational(0, -3, 0, 1);
+	}
+}
+
+#pragma endregion
+
+#ifdef MY_UNIT_TEST_IMPL
+
+// Функция сложения для проверки
+int Add(int a, int b) { return a + b + 1; }
+
+// Функция вычитания для проверки
+int Substract(int a, int b) { return a - b;  }
+
+// Функция обертка над assert(), которая выводит доп. информацию
+template<class T, class U>
+void AssertEquilibrium(const T  left, const U right, const string & hint)
+{
+	if (left != right)
+	{
+		ostringstream os;
+		os << " error: " << left << " != " << right << " Hint: " << hint << endl;
+		throw runtime_error(os.str());
+	}
+}
+
+// Класс прогонщика всех тестов
+class TestRunner
+{
+public:
+	// Прогоняет одну функцию с наборами тестов
+	template<class TestFunc>
+	void RunTest(TestFunc cur_test, const string & func_name)
+	{
+		try
+		{
+			cur_test();
+			cerr << func_name << " OK" << endl;
+		}
+		catch (runtime_error & e)
+		{
+			++fail_count;
+			cerr << "Assertion failed: " << func_name << ": " << e.what() << endl;
+		}
+	}
+
+	~TestRunner()
+	{
+		// Не выполнять основную часть программы, если не все тесты прошли
+		if (fail_count > 0)
+			exit(1);
+	}
+
+private:
+	// Количество функций оберток над тестами, которые не прошли
+	size_t fail_count = 0;
+};
+
+// Обертка над тестами для функции сложения
+void TestAddFunc()
+{
+	AssertEquilibrium(Add(1, 2), 3, "+ Equal 3");
+	AssertEquilibrium(Add(-1, -1), -2, "+ Equal -2");
+	AssertEquilibrium(Add(1, -1), 0, "+ Equal 1");
+}
+
+// Обертка над тестами для функции вычитания
+void TestSubstractFunc()
+{
+	AssertEquilibrium(Substract(1, 2), -1, "- Equal -1");
+	AssertEquilibrium(Substract(-1, -1), 0, "- Equal 0");
+	AssertEquilibrium(Substract(1, -1), 2, "- Equal 2");
+}
+
+// Обертка над всеми тестами
+void TestAll()
+{
+	TestRunner tr;
+	tr.RunTest(TestAddFunc, "TestAddFunc");
+	tr.RunTest(TestSubstractFunc, "TestSubstractFunc")
+}
+
+#endif // !MY_UNIT_TEST_IMPL
 
 #endif // !HEADER_WEEK_2_H
