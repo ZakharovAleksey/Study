@@ -1,4 +1,4 @@
-#include "header_week_1.h"
+#include "week_1.h"
 
 const TasksInfo & TeamTasks::GetPersonTasksInfo(const string & person) const
 {

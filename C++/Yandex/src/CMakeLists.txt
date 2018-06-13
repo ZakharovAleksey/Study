@@ -2,18 +2,20 @@ cmake_minimum_required(VERSION 3.5)
 
 set(
 	source_list
-	"week_1/header_week_1.h"
-	"week_1/source_week_1.cpp"
-	"week_2/header_week_2.h"
-	"week_2/source_week_2.cpp"
-	"week_3/header_week_3.h"
-	"week_3/source_week_3.cpp"
-	"week_4/header_week_4.h"
-	"week_4/source_week_4.cpp"
-	"week_5/header_week_5.h"
-	"week_5/source_week_5.cpp"
-	"week_6/header_week_6.h"
-	"week_6/source_week_6.cpp"
+	"week_1/week_1.h"
+	"week_1/week_1.cpp"
+	"week_2/week_2.h"
+	"week_2/week_2.cpp"
+	"week_3/week_3.h"
+	"week_3/week_3.cpp"
+	"week_4/week_4.h"
+	"week_4/week_4.cpp"
+	"week_5/week_5.h"
+	"week_5/week_5.cpp"
+	"week_6/week_6.h"
+	"week_6/week_6.cpp"
+	"unit_test/unit_test.h"
+	"unit_test/unit_test.cpp"	
 	"main.cpp"
 )
 
