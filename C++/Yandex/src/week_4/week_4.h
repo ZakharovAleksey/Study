@@ -2,6 +2,7 @@
 #include <iterator> 
 #include<vector>
 #include<set>
+#include<map>
 #include<cstring>
 
 using namespace std;
@@ -164,5 +165,67 @@ void MergeSortDiv3(RandomIt range_begin, RandomIt range_end)
 	merge(begin(tmp), begin(tmp) + dist / 3, begin(tmp) + dist / 3, begin(tmp) + 2 * dist / 3, back_inserter(lol));
 	merge(begin(lol), end(lol), begin(tmp) + 2 * dist / 3, end(tmp), range_begin);
 }
+
+#pragma endregion
+
+#pragma region Ближайший сосед
+
+set<int>::const_iterator FindNearestElement(const set<int>& numbers, int border);
+
+#pragma endregion
+
+#pragma region Имена и фамилии 
+
+namespace t
+{
+
+	class Person {
+	public:
+		// добавить факт изменения имени на first_name в год year
+		void ChangeFirstName(int year, const string& first_name);
+		// добавить факт изменения фамилии на last_name в год year
+		void ChangeLastName(int year, const string& last_name);
+		// получить имя и фамилию по состоянию на конец года year с помощью двоичного поиска
+		string GetFullName(int year);
+	private:
+		struct FullName
+		{
+			string first_name;
+			string last_name;
+
+			FullName(const string & f, const string & l) : first_name(f), last_name(l) {}
+		};
+		map<int, FullName> full_name;
+	};
+
+}
+#pragma endregion
+
+#pragma region Группировка строк по префиксу
+	
+template <typename RandomIt>
+pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end, char prefix)
+{
+	return {
+		lower_bound(range_begin, range_end, string(1, prefix)),
+		lower_bound(range_begin, range_end, string(1, static_cast<char>(prefix + 1))) };
+}
+
+template <typename RandomIt> 
+pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end, const std::string& prefix)
+{
+	size_t len = prefix.length();
+	return std::equal_range(range_begin, range_end, prefix,
+		[&prefix](const std::string& left, const std::string& right)
+	{
+		return left.compare(0, len, right.substr(0, len) ) < 0;
+	});
+}
+
+#pragma endregion
+
+#pragma region Построение арифметического выражения
+
+void ConstructEquationBySymbols();
 
 #pragma endregion

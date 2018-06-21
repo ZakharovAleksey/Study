@@ -2,6 +2,8 @@
 
 #include<iostream>
 #include <numeric>
+#include<deque>
+#include<string>
 
 void PrintVectorPart(const vector<int>& numbers)
 {
@@ -83,4 +85,91 @@ void PrintStats(vector<Person> persons)
 	);
 	cout << "Median age for employed males = " << ComputeMedianAge(f_m_pos, m_emp_pos) << endl;
 	cout << "Median age for unemployed males = " << ComputeMedianAge(m_emp_pos, end(persons)) << endl;
+}
+
+set<int>::const_iterator FindNearestElement(const set<int>& numbers, int border)
+{
+	// Check if set is empty
+	if (numbers.empty())
+		return end(numbers);
+	// Check if border is in the set
+	auto pos = numbers.find(border);
+	if (pos != end(numbers))
+		return pos;
+	else
+	{
+		// If border is less than min element in set
+		if (border <= *begin(numbers))
+			return begin(numbers);
+		// If border is higher than max element in set
+		else if (border >= *prev(end(numbers)))
+			return prev(end(numbers));
+		// If border is n range (min, max)
+		else
+		{
+			// Position of the next to border element 
+			auto right_pos = lower_bound(begin(numbers), end(numbers), border);
+			// Position of the previous to the border element
+			auto left_pos  = prev(right_pos);
+
+			// Return the closest elemet to border 
+			if (abs(border - *left_pos) <= abs(*right_pos - border))
+				return left_pos;
+			else
+				return right_pos;
+		}
+	}
+}
+
+bool CompareOperations(const string & prev, const string cur)
+{
+	const vector<string> high = { "*", "/" };
+	const vector<string> low =  { "+", "-" };
+
+	return (find(begin(high), end(high), cur) != end(high) &&
+		find(begin(low), end(low), prev) != end(low)) ? true : false;
+}
+
+void ConstructEquationBySymbols()
+{
+	int x; cin >> x;
+	size_t n = 0; cin >> n;
+	deque<string> eq = {to_string(x)};
+	string line; getline(cin, line);
+	string prev_operation = "*";
+	string next_operation;
+
+	for (size_t i = 0; i < n; ++i)
+	{
+		getline(cin, line);
+		size_t space_id = line.find(' ');
+		next_operation = line.substr(0, space_id);
+		if (CompareOperations(prev_operation, next_operation))
+		{
+			eq.push_front("(");
+			eq.push_back(")");
+		}
+		eq.push_back(" " + next_operation + " ");
+		eq.push_back(line.substr(space_id + 1, line.length()));
+		prev_operation = next_operation;
+	}
+
+	copy(begin(eq), end(eq), ostream_iterator<string>(cout, ""));
+	cout << endl;
+}
+
+namespace t
+{
+
+	void Person::ChangeFirstName(int year, const string& first_name)
+	{
+	}
+
+	void Person::ChangeLastName(int year, const string& last_name)
+	{
+	}
+
+	string Person::GetFullName(int year)
+	{
+	}
 }

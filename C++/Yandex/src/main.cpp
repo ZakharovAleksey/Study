@@ -12,17 +12,31 @@ using namespace unit_test;
 #include <functional>
 
 
-void TestLOL()
-{	
-	{
-		vector<int> v;
-		set<int> s = { 1, 2, 3, 4, 5 };
-	}
-}
-
 int main() 
 {
 	TestRunner tr;
+	
+	using namespace t;
+	t::Person person;
+
+	person.ChangeFirstName(1965, "Polina");
+	person.ChangeLastName(1967, "Sergeeva");
+	for (int year : {1900, 1965, 1990}) {
+		cout << person.GetFullName(year) << endl;
+	}
+
+	person.ChangeFirstName(1970, "Appolinaria");
+	for (int year : {1969, 1970}) {
+		cout << person.GetFullName(year) << endl;
+	}
+
+	person.ChangeLastName(1968, "Volkova");
+	for (int year : {1969, 1970}) {
+		cout << person.GetFullName(year) << endl;
+	}
+
+	return 0;
+
 
 	return 0;
 }
