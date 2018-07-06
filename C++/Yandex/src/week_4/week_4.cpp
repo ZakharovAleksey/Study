@@ -163,13 +163,26 @@ namespace t
 
 	void Person::ChangeFirstName(int year, const string& first_name)
 	{
+		f_name_[year] = first_name;
 	}
 
 	void Person::ChangeLastName(int year, const string& last_name)
 	{
+		l_name_[year] = last_name;
 	}
 
 	string Person::GetFullName(int year)
 	{
+		auto lb_first_name = f_name_.upper_bound(year);
+		auto lb_last_name = l_name_.upper_bound(year);
+
+		if (lb_first_name == begin(f_name_) && lb_last_name == begin(l_name_))
+			return "Incognito";
+		else if (lb_first_name == begin(f_name_) && lb_last_name != begin(l_name_))
+			return prev(lb_last_name)->second + " with unknown first name";
+		else if (lb_first_name != begin(f_name_) && lb_last_name == begin(l_name_))
+			return prev(lb_first_name)->second + " with unknown last name";
+		else
+			return prev(lb_first_name)->second + " " + prev(lb_last_name)->second;
 	}
 }

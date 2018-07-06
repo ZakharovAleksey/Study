@@ -188,14 +188,8 @@ namespace t
 		// получить имя и фамилию по состоянию на конец года year с помощью двоичного поиска
 		string GetFullName(int year);
 	private:
-		struct FullName
-		{
-			string first_name;
-			string last_name;
-
-			FullName(const string & f, const string & l) : first_name(f), last_name(l) {}
-		};
-		map<int, FullName> full_name;
+		map<int, string> f_name_;
+		map<int, string> l_name_;
 	};
 
 }
