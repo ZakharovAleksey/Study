@@ -11,18 +11,15 @@ using namespace std;
 
 class Animal {
 public:
-	Animal(const string & name) : Name(name) {}
+	Animal(const string & name);
 	const string Name;
 };
 
-
 class Dog : public Animal {
 public:
-	Dog(const string & name) : Animal(name) {}
+	Dog(const string & name);
 
-	void Bark() {
-		cout << Name << " barks: woof!" << endl;
-	}
+	void Bark();
 };
 
 #pragma endregion
@@ -34,14 +31,9 @@ public:
 
 using namespace std;
 
-void SendSms(const string& number, const string& message) {
-	cout << "Send '" << message << "' to number " << number << endl;
-}
+void SendSms(const string& number, const string& message);
 
-void SendEmail(const string& email, const string& message) {
-	cout << "Send '" << message << "' to e-mail " << email << endl;
-}
-
+void SendEmail(const string& email, const string& message);
 
 class INotifier
 {
@@ -52,11 +44,8 @@ public:
 class SmsNotifier : public INotifier
 {
 public:
-	SmsNotifier(const string & phone_number) : phone_number_(phone_number) {}
-	void Notify(const string & message) override
-	{
-		SendSms(phone_number_, message);
-	}
+	SmsNotifier(const string & phone_number);
+	void Notify(const string & message) override;
 
 private:
 	const string phone_number_;
@@ -65,19 +54,14 @@ private:
 class EmailNotifier : public INotifier
 {
 public:
-	EmailNotifier(const string & email_number) : email_number_(email_number) {}
-	void Notify(const string & message) override
-	{
-		SendEmail(email_number_, message);
-	}
+	EmailNotifier(const string & email_number);
+	void Notify(const string & message) override;
 
 private:
 	const string email_number_;
 };
 
-void Notify(INotifier& notifier, const string& message) {
-	notifier.Notify(message);
-}
+void Notify(INotifier& notifier, const string& message);
 
 #pragma endregion
 
@@ -110,16 +94,8 @@ class Triangle : public Figure
 public:
 	Triangle(int a, int b, int c) : Figure("TRIANGLE"), a_(a), b_(b), c_(c) {}
 
-	double Perimeter() override
-	{
-		return a_ + b_ + c_;
-	}
-
-	double Area() override
-	{
-		double p = Perimeter() / 2.f;
-		return sqrt(p * (p - a_) * (p - b_) * (p - c_));
-	}
+	double Perimeter() override;
+	double Area() override;
 
 private:
 	int a_, b_, c_;
@@ -130,14 +106,8 @@ class Rect : public Figure
 public:
 	Rect(int width, int height) : Figure("RECT"), width_(width), height_(height) {}
 
-	double Perimeter() override
-	{
-		return (width_ + height_) * 2.f;
-	}
-	double Area() override
-	{
-		return width_ * height_;
-	}
+	double Perimeter() override;
+	double Area() override;
 
 private:
 	int width_, height_;
@@ -148,39 +118,14 @@ class Circle : public Figure
 public:
 	Circle(int r) : Figure("CIRCLE"), r_(r) {}
 
-	double Perimeter() override
-	{
-		return 2. * 3.14 * r_;
-	}
-	double Area() override
-	{
-		return 3.14 * r_ * r_;
-	}
+	double Perimeter() override;
+	double Area() override;
 
 private:
 	int r_;
 };
 
-shared_ptr<Figure> CreateFigure(istringstream & is)
-{
-	string figure_type; is >> figure_type;
-
-	if (figure_type == "RECT")
-	{
-		int width, height; is >> width >> height;
-		return make_shared<Rect>(width, height);
-	}
-	else if (figure_type == "TRIANGLE")
-	{
-		int a, b, c; is >> a >> b >> c;
-		return make_shared<Triangle>(a, b, c);
-	}
-	else if (figure_type == "CIRCLE")
-	{
-		int r; is >> r;
-		return make_shared<Circle>(r);
-	}
-}
+shared_ptr<Figure> CreateFigure(istringstream & is);
 
 #pragma endregion
 
@@ -199,21 +144,14 @@ public:
 		Name(name), Profession(profession) { }
 	virtual ~Human() {}
 
-	virtual void Walk(const string & destination) const
-	{
-		cout << Profession << ": " << Name << " walks to: " << destination << endl;
-	}
+	virtual void Walk(const string & destination) const;
 
 	const string Name;
 	const string Profession;
 
 protected:
 	// Additional method for output overloading
-	void TmpStringOutput(string first_part, const string & second_part = "") const
-	{
-		cout << Profession << ": " << Name << first_part << second_part << endl;
-	}
-
+	void TmpStringOutput(string first_part, const string & second_part = "") const;
 };
 
 class Student : public Human {
@@ -222,21 +160,10 @@ public:
 	Student(const string & name, const string & favouriteSong) :
 		Human(name, "Student"), FavouriteSong(favouriteSong) { }
 
-	void Learn() const
-	{
-		TmpStringOutput(" learns");
-	}
+	void Learn() const;
+	void SingSong() const;
 
-	void SingSong() const
-	{
-		TmpStringOutput(" sings a song: ", FavouriteSong);
-	}
-
-	void Walk(const string & destination) const override
-	{
-		Human::Walk(destination);
-		SingSong();
-	}
+	void Walk(const string & destination) const override;
 
 private:
 	const string FavouriteSong;
@@ -248,10 +175,7 @@ public:
 	Teacher(const string & name, const string & subject) :
 		Human(name, "Teacher"), Subject(subject) { }
 
-	void Teach() const
-	{
-		TmpStringOutput(" teaches: ", Subject);
-	}
+	void Teach() const;
 
 private:
 	const string Subject;
@@ -261,18 +185,10 @@ class Policeman : public Human {
 public:
 	Policeman(const string & name) : Human(name, "Policeman") { }
 
-	void Check(const Human & h) const
-	{
-		cout << Profession << ": " << Name << " checks " << h.Profession << ". "
-			<< h.Profession << "\'s name is: " << h.Name << endl;
-	}
+	void Check(const Human & h) const;
 };
 
-void VisitPlaces(const Human & h, const vector<string> & places)
-{
-	for (const auto & p : places)
-		h.Walk(p);
-}
+void VisitPlaces(const Human & h, const vector<string> & places);
 
 #pragma endregion
 
