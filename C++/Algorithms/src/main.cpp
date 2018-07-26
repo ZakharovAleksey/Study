@@ -4,6 +4,8 @@
 #include"data_structures\bloom_filter.h"
 #include"practice\practice.h"
 
+#include"data_structures\splay_tree.h"
+
 #include<iostream>
 #include<vector>
 #include<tuple>
@@ -20,7 +22,7 @@ void TestAll();
 int main() 
 {
 	TestAll();
-
+	
 	return 0;
 }
 
@@ -44,4 +46,6 @@ void TestAll()
 	tr.RunTest(data_struct::HashTableTest, "HashTableTest");
 	tr.RunTest(data_struct::BinTreeTest, "BinTreeTest");
 	tr.RunTest(data_struct::DequeTest, "DequeTest");
+
+	tr.RunTest(tree::SplayTreeTest, "SplayTreeTest");
 }

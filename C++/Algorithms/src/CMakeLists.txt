@@ -6,6 +6,8 @@ set(
 	"sorting/sorting.cpp"
 	"data_structures/data_structures.h"
 	"data_structures/data_structures.cpp"
+	"data_structures/splay_tree.h"
+	"data_structures/splay_tree.cpp"
 	"data_structures/bloom_filter.h"
 	"practice/practice.h"
 	"practice/practice.cpp"
