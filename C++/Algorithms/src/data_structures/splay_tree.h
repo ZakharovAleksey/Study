@@ -38,6 +38,7 @@ namespace tree
 		void Insert(const int & value);
 		bool Find(const int & value);
 		void Remove(const int & value);
+		bool IsEmpty() const;
 		int GetRootValue() const;
 
 		// Calculates the depth of the tree

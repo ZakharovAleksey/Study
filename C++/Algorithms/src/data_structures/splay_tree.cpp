@@ -66,14 +66,26 @@ namespace tree
 	void SplayTree::Remove(const int & value)
 	{
 		NodeStPtr cur_node = Find(root_, value);
-		if (cur_node)
-			Splay(cur_node);
-		
-		try { Remove(root_); } // Instead of remove cur_node we remove root
-		catch (const std::exception & ex)
+		// BST remove algorithm
+		//if (cur_node)
+		//	Remove(root_);
+
+		// Here we need to perform Merge procedure instead of BST remove
+		if (!cur_node)
+			return;
+		Splay(cur_node);
+		// If root has no left son
+		if (!root_->left)
+			root_ = root_->right;
+		else
 		{
-			cerr << ex.what();
+			// Find successor
 		}
+	}
+
+	bool SplayTree::IsEmpty() const
+	{
+		return (!root_);
 	}
 
 	int SplayTree::GetRootValue() const
@@ -161,10 +173,6 @@ namespace tree
 	{
 		NodeStPtr parent = cur_node->parent;
 		NodeStPtr existed_son = (cur_node->left) ? cur_node->left : cur_node->right;
-
-		// !!! Not correct remove implementation:
-		// right sub tree -> sucessor + remove
-		// left sub tree -> precessoc + remove
 
 		if (cur_node == parent->left)
 		{
@@ -304,10 +312,10 @@ namespace tree
 		unit_test::AssertEqual(st.Find(-1), false, "Splay Tree: not find value test");
 		unit_test::AssertEqual(st.Find(4), true, "Splay Tree: find value test");
 
-		/*for (const auto & el : elements)
+		for (const auto & el : elements)
 			st.Remove(el);
 
-		unit_test::AssertEqual(st.GetDepth(), 0, " SplayTree: remove all elements");*/
+		unit_test::AssertEqual(st.IsEmpty(), true, " SplayTree: remove all elements");
 	}
 
 }
