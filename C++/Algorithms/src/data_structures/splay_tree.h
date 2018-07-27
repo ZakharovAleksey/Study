@@ -34,6 +34,7 @@ namespace tree
 	{
 	public:
 		SplayTree();
+		SplayTree(NodeStPtr root) : root_(root) {}
 
 		void Insert(const int & value);
 		bool Find(const int & value);
@@ -54,12 +55,8 @@ namespace tree
 
 		NodeStPtr Find(NodeStPtr cur_node,  const int & value) const;
 
-		void Remove(NodeStPtr cur_node);
-		void RemoveLeaf(NodeStPtr cur_node);
-		void RemoveOneChild(NodeStPtr cur_node);
-
-		// Finds the node with highest value that is less than cur_node value
-		NodeStPtr Predecessor(NodeStPtr cur_node);
+		// Is used for Remove proedure with two sons
+		void SplitAndMerge();
 
 		// Rotations
 

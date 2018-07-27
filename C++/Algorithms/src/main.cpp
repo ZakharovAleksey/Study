@@ -5,6 +5,7 @@
 #include"practice\practice.h"
 
 #include"data_structures\splay_tree.h"
+#include"data_structures\bin_search_tree.h"
 
 #include<iostream>
 #include<vector>
@@ -22,7 +23,7 @@ void TestAll();
 int main() 
 {
 	TestAll();
-	
+
 	return 0;
 }
 
@@ -48,4 +49,5 @@ void TestAll()
 	tr.RunTest(data_struct::DequeTest, "DequeTest");
 
 	tr.RunTest(tree::SplayTreeTest, "SplayTreeTest");
+	tr.RunTest(tree::BSTreeTest, "BSTreeTest");
 }

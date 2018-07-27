@@ -13,8 +13,13 @@ namespace tree
 
 	ostream & operator<<(ostream & os, const SplayTree & st)
 	{
-		st.InorderTraversal(st.root_, os);
-		os << endl;
+		if (st.IsEmpty())
+			os << "SplayTree is empty" << endl;
+		else
+		{
+			st.InorderTraversal(st.root_, os);
+			os << endl;
+		}
 		return os;
 	}
 
@@ -66,21 +71,31 @@ namespace tree
 	void SplayTree::Remove(const int & value)
 	{
 		NodeStPtr cur_node = Find(root_, value);
-		// BST remove algorithm
-		//if (cur_node)
-		//	Remove(root_);
-
-		// Here we need to perform Merge procedure instead of BST remove
+		
 		if (!cur_node)
 			return;
 		Splay(cur_node);
-		// If root has no left son
-		if (!root_->left)
-			root_ = root_->right;
-		else
+		// Case 1. Root has no sons (left AND right)
+		if (!root_->left && !root_->right)
+			root_.reset();
+
+		// Case 2. Root has ONLY one son (left or right)
+		else if (!root_->left && root_->right)
 		{
-			// Find successor
+			NodeStPtr right_son = root_->right;
+			root_.reset();
+			root_ = right_son;
+			root_->parent = nullptr;
 		}
+		else if (!root_->right && root_->left)
+		{
+			NodeStPtr left_son = root_->left;
+			root_.reset();
+			root_ = left_son;
+			root_->parent = nullptr;
+		}
+		else
+			SplitAndMerge();
 	}
 
 	bool SplayTree::IsEmpty() const
@@ -116,7 +131,7 @@ namespace tree
 		if (!cur_node)
 			return 0;
 		size_t left_depth = GetDepth(cur_node->left);
-		size_t right_depth = GetDepth(cur_node->left);
+		size_t right_depth = GetDepth(cur_node->right);
 
 		return (left_depth < right_depth) ? right_depth + 1 : left_depth + 1;
 	}
@@ -131,70 +146,29 @@ namespace tree
 		return Find(cur_node->right, value);
 	}
 
-	void SplayTree::Remove(NodeStPtr cur_node)
+	void SplayTree::SplitAndMerge()
 	{
-		if (!cur_node)
-			return;
+		/*
+			Remove root with two childs explanation:
+			1. Create two sub-trees: left and right (root is out of game - we remove it)
+			2. Find maximum value in left sub tree and Splay() it in LEFT sub-tree
+			As a result in the root of LEFT sub tree will be maximal element:
+				- It has no right son (because this is max value)
+			All values in LEFT sub-tree less than all elements in RIGHT sub-tree
+			3. Add right sub-tree as right son of rool for LEFT sub-tree
+		*/
 
-		// If current node is a leaf
-		if (!cur_node->left && !cur_node->right)
-			RemoveLeaf(cur_node);
+		SplayTree l_sub_tree(root_->left);
+		SplayTree r_sub_tree(root_->right);
+		l_sub_tree.root_->parent = r_sub_tree.root_->parent = nullptr;
 
-		// If current node has ONLY one child: left or right
-		else if ((cur_node->left && !cur_node->right) || (!cur_node->left && cur_node->right))
-			RemoveOneChild(cur_node);
+		NodeStPtr l_max_el = l_sub_tree.root_;
+		while (l_max_el->right)
+			l_max_el = l_max_el->right;
+		l_sub_tree.Splay(l_max_el);
+		l_sub_tree.root_->right = r_sub_tree.root_;
 
-		// If current node has both childs
-		else
-		{
-			NodeStPtr predessor = Predecessor(cur_node);
-			swap(cur_node->value, predessor->value);
-			Remove(predessor);
-		}
-	}
-
-	void SplayTree::RemoveLeaf(NodeStPtr cur_node)
-	{
-		NodeStPtr parent = cur_node->parent;
-		
-		if (cur_node == parent->left)
-		{
-			cur_node.reset();
-			parent->left = nullptr;
-		}
-		else
-		{
-			cur_node.reset();
-			parent->right = nullptr;
-		}
-	}
-
-	void SplayTree::RemoveOneChild(NodeStPtr cur_node)
-	{
-		NodeStPtr parent = cur_node->parent;
-		NodeStPtr existed_son = (cur_node->left) ? cur_node->left : cur_node->right;
-
-		if (cur_node == parent->left)
-		{
-			cur_node.reset();
-			parent->left = existed_son;
-			existed_son->parent = parent;
-		}
-		else
-		{
-			cur_node.reset();
-			parent->right = existed_son;
-			existed_son->parent = parent;
-		}
-	}
-
-	NodeStPtr SplayTree::Predecessor(NodeStPtr cur_node)
-	{
-		NodeStPtr predecessor = cur_node->left;
-		while (predecessor->right)
-			predecessor = predecessor->right;
-
-		return predecessor;
+		root_ = l_sub_tree.root_;
 	}
 
 	void SplayTree::Splay(NodeStPtr cur_node)
@@ -299,7 +273,7 @@ namespace tree
 	void SplayTreeTest()
 	{
 		SplayTree st;
-		vector<int> elements = { 0, 2, 1, 6, 4, 5 };
+		vector<int> elements =  { 0, 2, 1, 6, 4, 5 };
 		vector<size_t> depths = { 1, 2, 2, 4, 4, 5 };
 		
 		for(auto it = begin(elements); it != end(elements); ++it)
