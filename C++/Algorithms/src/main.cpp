@@ -6,6 +6,8 @@
 
 #include"data_structures\splay_tree.h"
 #include"data_structures\bin_search_tree.h"
+#include"data_structures\prefix_tree.h"
+
 
 #include<iostream>
 #include<vector>
@@ -22,7 +24,24 @@ void TestAll();
 
 int main() 
 {
-	TestAll();
+	//TestAll();
+
+	cout << 1 % 10 << endl;
+
+	vector<string> words = { "the", "a", "there", "answer", "any", "by", "bye", "their", "lol" };
+
+	tree::TrieTree t;
+	for (const auto & w : words)
+		t.Insert(w);
+	
+	cout << t.Search("any") << endl;
+	cout << t.Search("anyl") << endl;
+	cout << t.Search("a") << endl;
+	cout << t.Search("bye") << endl;
+	cout << t.Search("bae") << endl;
+
+	t.Remove("loli");
+
 
 	return 0;
 }
