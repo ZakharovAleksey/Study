@@ -24,25 +24,7 @@ void TestAll();
 
 int main() 
 {
-	//TestAll();
-
-	cout << 1 % 10 << endl;
-
-	vector<string> words = { "the", "a", "there", "answer", "any", "by", "bye", "their", "lol" };
-
-	tree::TrieTree t;
-	for (const auto & w : words)
-		t.Insert(w);
-	
-	cout << t.Search("any") << endl;
-	cout << t.Search("anyl") << endl;
-	cout << t.Search("a") << endl;
-	cout << t.Search("bye") << endl;
-	cout << t.Search("bae") << endl;
-
-	t.Remove("loli");
-
-
+	TestAll();
 	return 0;
 }
 
@@ -69,4 +51,6 @@ void TestAll()
 
 	tr.RunTest(tree::SplayTreeTest, "SplayTreeTest");
 	tr.RunTest(tree::BSTreeTest, "BSTreeTest");
+
+	tr.RunTest(tree::TrieTreeTest, "TrieTreeTest");
 }

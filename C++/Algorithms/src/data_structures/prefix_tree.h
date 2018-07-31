@@ -30,18 +30,21 @@ namespace tree
 
 		void Insert(const string & word);
 		bool Search(const string & word);
+		// Removement done !!! But ont complited -> because did not deallocate full memory !!!
+		// Play with nodes_ptr to deal with this situation
 		void Remove(const string & word);
 
+		bool IsEmpty() const;
 	private:
 
-		// Not finished -> deal with removing
-		tuple<bool, bool, bool, bool> Find(const string & word);
+		bool DeleteHelper(TrieNodePtr cur_node, const string & word, string::const_iterator cur_symb_it);
 
 	private:
 		TrieNodePtr root_;
 	};
 
 
+	void TrieTreeTest();
 }
 
 #endif // !PREFIX_TREE_H

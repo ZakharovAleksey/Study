@@ -1,5 +1,7 @@
 #include"prefix_tree.h"
 
+#include"../unit_test/unit_test.h"
+
 #include<iostream>
 #include<algorithm>
 
@@ -10,10 +12,11 @@ namespace tree
 	void TrieTree::Insert(const string & word)
 	{
 		TrieNodePtr cur_node = root_;
-		for(auto symb_it = begin(word); symb_it != end(word); ++symb_it)
+		for (auto symb_it = begin(word); symb_it != end(word); ++symb_it)
 		{
 			cur_node->body.insert({ *symb_it, make_shared<TrieNode>() });
 			cur_node = cur_node->body[*symb_it];
+			//cur_node = (symb_it == prev(end(word))) ? cur_node : cur_node->body[*symb_it];
 		}
 		cur_node->is_complete_word = true;
 	}
@@ -29,69 +32,90 @@ namespace tree
 			});
 
 			if (next_pos != end(cur_node->body))
-				cur_node = next_pos->second;
+				cur_node = cur_node->body[*symb_it];
+			//cur_node = (symb_it == prev(end(word))) ? cur_node : cur_node->body[*symb_it];
 			else
 				return false;
 		}
-		return (cur_node->is_complete_word);
+		return cur_node->is_complete_word;
 	}
 
 	void TrieTree::Remove(const string & word)
 	{
-		bool is_in_tree = false, is_unique_key = false, is_contains_prefix = false, is_prefix_itself = false;
-		tie(is_in_tree, is_unique_key, is_contains_prefix, is_prefix_itself) = Find(word);
-
-		if (!is_in_tree)
-			return;
-		
-		
-		// If it is unique word (has no other prefix words, or is not prefix itself)
-		
+		DeleteHelper(root_, word, begin(word));
 	}
 
-	tuple<bool, bool, bool, bool> TrieTree::Find(const string & word)
+	bool TrieTree::IsEmpty() const
 	{
-		TrieNodePtr cur_node = root_;
-		bool is_in_tree = false, 
-			 is_unique_key = true, // Тут надо еще проверить на то что у нас в дереве одно слово a
-			 is_contains_prefix = false,
-			 is_prefix_itself = false;
+		return root_->body.size() == 0;
+	}
 
-		for (auto symb_it = begin(word); symb_it != end(word); ++symb_it)
+	bool TrieTree::DeleteHelper(TrieNodePtr cur_node, const string & word, string::const_iterator cur_symb_it)
+	{
+		if (cur_node->body.empty() || word.empty() || cur_symb_it == end(word))
+			return false;
+
+		// Find if current word's symbol is in hash map of current layer
+		auto cur_layer_it = find_if(begin(cur_node->body), end(cur_node->body), [&cur_symb_it](const pair<char, TrieNodePtr> & p)
 		{
-			auto next_pos = find_if(begin(cur_node->body), end(cur_node->body), [&symb_it](const pair<char, TrieNodePtr> & p)
+			return p.first == *cur_symb_it;
+		});
+
+		if (cur_layer_it != end(cur_node->body))
+		{
+			// If we get to the last symbol of the word
+			if (cur_symb_it == prev(end(word)))
 			{
-				return p.first == *symb_it;
-			});
+				// If this is the ONLY symbol on this layer
+				//cur_node->is_complete_word = false;
+				cur_layer_it->second->is_complete_word = false;
 
-			// Check on unique key: In: red, redmont, lol -> remove lol
-			// If on road sizes (from SECOND to the end) of all hash_map's are equal to 1 - this is unique key
-			if (distance(begin(word), symb_it) == 1 && cur_node->body.size() == 1)
-				is_unique_key = true;
-
-			// Check if this key contains prefix: In: red, redmont, lol, lolol -> remove lolol
-			// If on the the road we obtain even one is_complete_word true  - this key contains prefix
-			if (cur_node->is_complete_word)
-				is_contains_prefix = true;
-
-			if (next_pos != end(cur_node->body))
-				cur_node = next_pos->second;
-			// Check if this key is not found in tree: In: red, redmont -> remove lol
+				// Set node to remove if it has no child
+				if (cur_layer_it->second->body.empty())
+					return true;
+				return false;
+			}
 			else
-				return tie(is_in_tree, is_unique_key, is_contains_prefix, is_prefix_itself);
+			{
+				if (DeleteHelper(cur_layer_it->second, word, next(cur_symb_it)))
+				{
+					// Remove node from hash_map on current layer if it is unique
+					cur_layer_it->second->body.erase(*next(cur_symb_it));
+
+					return cur_node->body.empty() && !cur_node->is_complete_word;
+				}
+			}
 		}
 
-		// Check if this key is prefix for another word:
-		// If on the next layer for last letter in word we have not empty node: In: red, redmont, lol, lolol -> remove lol
-		if (!cur_node->body[*rbegin(word)]->body.empty())
-			is_prefix_itself = true;
-
-		// Еще рассмотреть случай lol loa [a, l - different letters]
-
-		if (cur_node->is_complete_word)
-			is_in_tree = true;
-
-		return tie(is_in_tree, is_unique_key, is_contains_prefix, is_prefix_itself);
+		return false;
 	}
 
+	void TrieTreeTest()
+	{
+		vector<string> words = { "the", "there", "their", "a", "answer", "any", "by", "bye", "lol", "loh" };
+
+		tree::TrieTree t;
+		for (const auto & w : words)
+			t.Insert(w);
+
+		for (const auto & w : words)
+			unit_test::AssertEqual(t.Search(w), true, " TrieTree: search elements which it tree");
+
+		t.Remove("bye");
+		unit_test::AssertEqual(t.Search("by"), true, "Trie Tree: serach word: by");
+		unit_test::AssertEqual(t.Search("bye"), false, "Trie Tree: serach word: bye");
+		t.Remove("a");
+		unit_test::AssertEqual(t.Search("any"), true, "Trie Tree: serach word: any");
+		unit_test::AssertEqual(t.Search("a"), false, "Trie Tree: serach word: a");
+		t.Remove("lol");
+		unit_test::AssertEqual(t.Search("loh"), true, "Trie Tree: serach word: loh");
+		unit_test::AssertEqual(t.Search("lol"), false, "Trie Tree: serach word: lol");
+
+		t.Insert("bye"); t.Insert("a"), t.Insert("lol");
+
+		for (const auto & w : words)
+			t.Remove(w);
+		
+		//unit_test::AssertEqual(t.IsEmpty(), true, "Trie Tree: remove all elements");
+	}
 }
