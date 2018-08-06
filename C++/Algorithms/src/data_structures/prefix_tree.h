@@ -15,10 +15,10 @@ namespace tree
 
 	struct TrieNode
 	{
-		unordered_map<char, TrieNodePtr> body;
+		unordered_map<char, TrieNodePtr> childs;
 		bool is_complete_word;
 
-		TrieNode() : body(), is_complete_word(false) {}
+		TrieNode() : childs(), is_complete_word(false) {}
 	};
 
 	// Trie Tree: 

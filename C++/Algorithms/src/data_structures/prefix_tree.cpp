@@ -14,8 +14,8 @@ namespace tree
 		TrieNodePtr cur_node = root_;
 		for (auto symb_it = begin(word); symb_it != end(word); ++symb_it)
 		{
-			cur_node->body.insert({ *symb_it, make_shared<TrieNode>() });
-			cur_node = cur_node->body[*symb_it];
+			cur_node->childs.insert({ *symb_it, make_shared<TrieNode>() });
+			cur_node = cur_node->childs[*symb_it];
 			//cur_node = (symb_it == prev(end(word))) ? cur_node : cur_node->body[*symb_it];
 		}
 		cur_node->is_complete_word = true;
@@ -26,13 +26,13 @@ namespace tree
 		TrieNodePtr cur_node = root_;
 		for (auto symb_it = begin(word); symb_it != end(word); ++symb_it)
 		{
-			auto next_pos = find_if(begin(cur_node->body), end(cur_node->body), [&symb_it](const pair<char, TrieNodePtr> & p)
+			auto next_pos = find_if(begin(cur_node->childs), end(cur_node->childs), [&symb_it](const pair<char, TrieNodePtr> & p)
 			{
 				return p.first == *symb_it;
 			});
 
-			if (next_pos != end(cur_node->body))
-				cur_node = cur_node->body[*symb_it];
+			if (next_pos != end(cur_node->childs))
+				cur_node = cur_node->childs[*symb_it];
 			//cur_node = (symb_it == prev(end(word))) ? cur_node : cur_node->body[*symb_it];
 			else
 				return false;
@@ -43,46 +43,59 @@ namespace tree
 	void TrieTree::Remove(const string & word)
 	{
 		DeleteHelper(root_, word, begin(word));
+
+		for (auto it = begin(root_->childs); it != end(root_->childs);)
+		{
+			if (it->second->childs.empty())
+				it = root_->childs.erase(it);
+			else
+				++it;
+		}
 	}
 
 	bool TrieTree::IsEmpty() const
 	{
-		return root_->body.size() == 0;
+		return root_->childs.size() == 0;
 	}
 
 	bool TrieTree::DeleteHelper(TrieNodePtr cur_node, const string & word, string::const_iterator cur_symb_it)
 	{
-		if (cur_node->body.empty() || word.empty() || cur_symb_it == end(word))
+		if (cur_node->childs.empty() || word.empty() || cur_symb_it == end(word))
 			return false;
 
 		// Find if current word's symbol is in hash map of current layer
-		auto cur_layer_it = find_if(begin(cur_node->body), end(cur_node->body), [&cur_symb_it](const pair<char, TrieNodePtr> & p)
+		auto child_it = find_if(begin(cur_node->childs), end(cur_node->childs), [&cur_symb_it](const pair<char, TrieNodePtr> & p)
 		{
 			return p.first == *cur_symb_it;
 		});
 
-		if (cur_layer_it != end(cur_node->body))
+		if (child_it != end(cur_node->childs))
 		{
+			TrieNodePtr child_node = child_it->second;
 			// If we get to the last symbol of the word
 			if (cur_symb_it == prev(end(word)))
 			{
 				// If this is the ONLY symbol on this layer
-				//cur_node->is_complete_word = false;
-				cur_layer_it->second->is_complete_word = false;
+				child_node->is_complete_word = false;
 
 				// Set node to remove if it has no child
-				if (cur_layer_it->second->body.empty())
+				if (child_node->childs.empty())
 					return true;
 				return false;
 			}
 			else
 			{
-				if (DeleteHelper(cur_layer_it->second, word, next(cur_symb_it)))
+				if (DeleteHelper(child_node, word, next(cur_symb_it)))
 				{
 					// Remove node from hash_map on current layer if it is unique
-					cur_layer_it->second->body.erase(*next(cur_symb_it));
+					child_node->childs.erase(*next(cur_symb_it));
+					
+					// Check child node [Remove this node or not]
+					// !!! HINT: this conditions are EQUAL to the conditions in previous cycle !!!
+					bool is_child_node_compl_word = child_node->is_complete_word;
+					bool is_child_node_empty = child_node->childs.empty();
 
-					return cur_node->body.empty() && !cur_node->is_complete_word;
+					return is_child_node_empty && !is_child_node_compl_word;
 				}
 			}
 		}
@@ -115,7 +128,7 @@ namespace tree
 
 		for (const auto & w : words)
 			t.Remove(w);
-		
-		//unit_test::AssertEqual(t.IsEmpty(), true, "Trie Tree: remove all elements");
+
+		unit_test::AssertEqual(t.IsEmpty(), true, "Trie Tree: remove all elements");
 	}
 }
