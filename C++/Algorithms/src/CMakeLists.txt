@@ -14,6 +14,8 @@ set(
 	"data_structures/prefix_tree.cpp"
 	"data_structures/b_tree.h"
 	"data_structures/b_tree.cpp"
+	"data_structures/rb_tree.h"
+	"data_structures/rb_tree.cpp"
 	"data_structures/bloom_filter.h"
 	"practice/practice.h"
 	"practice/practice.cpp"

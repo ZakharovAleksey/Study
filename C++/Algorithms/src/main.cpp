@@ -8,6 +8,7 @@
 #include"data_structures\bin_search_tree.h"
 #include"data_structures\prefix_tree.h"
 #include"data_structures\b_tree.h"
+#include"data_structures\rb_tree.h"
 
 #include<iostream>
 #include<vector>
@@ -26,7 +27,6 @@ void TestAll();
 int main() 
 {
 	TestAll();
-
 
 	return 0;
 }
@@ -56,4 +56,5 @@ void TestAll()
 	tr.RunTest(tree::BSTreeTest, "BSTreeTest");
 	tr.RunTest(tree::TrieTreeTest, "TrieTreeTest");
 	tr.RunTest(tree::BTreeTest, "BTreeTest");
+	tr.RunTest(tree::RBTreeTest, "RBTreeTest");
 }
