@@ -10,6 +10,8 @@
 #include"data_structures\b_tree.h"
 #include"data_structures\rb_tree.h"
 
+#include"data_structures/heaps.h"
+
 #include<iostream>
 #include<vector>
 #include<tuple>
@@ -27,6 +29,7 @@ void TestAll();
 int main() 
 {
 	TestAll();
+	
 
 	return 0;
 }
@@ -57,4 +60,8 @@ void TestAll()
 	tr.RunTest(tree::TrieTreeTest, "TrieTreeTest");
 	tr.RunTest(tree::BTreeTest, "BTreeTest");
 	tr.RunTest(tree::RBTreeTest, "RBTreeTest");
+
+	// Heaps
+	tr.RunTest(heap::BinHeapTest, "BinHeapTest");
+	tr.RunTest(heap::BinomHeapTest, "BinomHeapTest");
 }
