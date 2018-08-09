@@ -11,6 +11,7 @@
 #include"data_structures\rb_tree.h"
 
 #include"data_structures/heaps.h"
+#include"data_structures\cartesian_tree.h"
 
 #include<iostream>
 #include<vector>
@@ -29,6 +30,8 @@ void TestAll();
 int main() 
 {
 	TestAll();
+	
+
 	
 
 	return 0;
@@ -64,4 +67,5 @@ void TestAll()
 	// Heaps
 	tr.RunTest(heap::BinHeapTest, "BinHeapTest");
 	tr.RunTest(heap::BinomHeapTest, "BinomHeapTest");
+	tr.RunTest(tree::TestCartesianTree, "TestCartesianTree");
 }

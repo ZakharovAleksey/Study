@@ -18,6 +18,8 @@ set(
 	"data_structures/rb_tree.cpp"
 	"data_structures/heaps.h"
 	"data_structures/heaps.cpp"
+	"data_structures/cartesian_tree.h"
+	"data_structures/cartesian_tree.cpp"
 	"data_structures/bloom_filter.h"
 	"practice/practice.h"
 	"practice/practice.cpp"
