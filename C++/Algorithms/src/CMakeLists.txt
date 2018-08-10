@@ -21,6 +21,8 @@ set(
 	"data_structures/cartesian_tree.h"
 	"data_structures/cartesian_tree.cpp"
 	"data_structures/bloom_filter.h"
+	"graphs/graph.h"
+	"graphs/graph.cpp"
 	"practice/practice.h"
 	"practice/practice.cpp"
 	"unit_test/unit_test.h"

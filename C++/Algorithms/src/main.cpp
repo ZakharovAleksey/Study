@@ -13,6 +13,9 @@
 #include"data_structures/heaps.h"
 #include"data_structures\cartesian_tree.h"
 
+// Graph
+#include"graphs\graph.h"
+
 #include<iostream>
 #include<vector>
 #include<tuple>
@@ -29,10 +32,47 @@ void TestAll();
 
 int main() 
 {
-	TestAll();
-	
+	//TestAll();
 
+	graph::Graph gr(true);
+	gr.Add(0, 1);
+	gr.Add(1, 2);
+	//gr.Add(2, 4);
+	gr.Add(1, 4);
+	gr.Add(4, 3);
+	gr.Add(3, 2);
+	//gr.Add(1, 3);
+	//gr.Add(1, 2);
+	//gr.Add(2, 3);
+	//gr.Add(3, 4);
+	//gr.Add(3, 0);
+	//gr.Add(3, 1);
+	//gr.Add(4, 0);
+	//gr.Add(4, 1);
+
+	//gr.Add(5, 6);
+	//gr.Add(6, 7);
+
+	//gr.Add(8, 8);
+
+
+
+	cout << gr;
+	cout << "v numb = " << gr.GetVertexNumb() << endl;
+	gr.DFS();
+
+	auto res = gr.ConnsectedCompNumb();
+	for (const auto & i : res)
+	{
+		cout << i.first << ": ";
+		copy(begin(i.second), end(i.second), ostream_iterator<int>(cout, " "));
+		cout << endl;
+	}
 	
+	cout << gr.IsCircleDetect() << endl;
+	
+	gr.TopoligicalSort();
+		
 
 	return 0;
 }
