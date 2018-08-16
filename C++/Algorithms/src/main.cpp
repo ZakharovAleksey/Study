@@ -48,8 +48,8 @@ int main()
 	gr.Add(0, 5);
 	gr.Add(4, 6);
 	gr.Add(6, 5);
-	gr.Add(5, 10);
-	gr.Add(10, 6);
+	gr.Add(5, 9);
+	gr.Add(9, 6);
 
 	cout << gr;
 	cout << "v numb = " << gr.GetVertexNumb() << endl;
@@ -62,6 +62,12 @@ int main()
 		copy(begin(i.second), end(i.second), ostream_iterator<int>(cout, " "));
 		cout << endl;
 	}
+
+	gr.BFS(3);
+
+	auto shp = gr.ShortestDistance(4, 7);
+	copy(begin(shp), end(shp), ostream_iterator<size_t>(cout, " ->"));
+	cout << endl;
 
 	/*cout << "v numb = " << gr.GetVertexNumb() << endl;
 	gr.DFS();

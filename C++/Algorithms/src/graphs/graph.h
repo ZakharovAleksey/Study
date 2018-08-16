@@ -24,7 +24,7 @@ namespace graph
 		bool Find(int start, int end);
 		size_t GetVertexNumb() const;
 
-		// Algorithms
+		// Algorithms based on DFS
 		void DFS();
 		map<size_t, vector<int>> ConnectedCompNumb();
 		map<size_t, vector<int>> StrongConnectedCompNumb();
@@ -34,6 +34,9 @@ namespace graph
 		void TopoligicalSort();
 		vector<int> TopologicalSortDFS();
 
+		// Algorithms based on BFS
+		void BFS(size_t start_id);
+		vector<size_t> ShortestDistance(size_t start_id, size_t end_id);
 
 		friend ostream & operator<<(ostream & os, const Graph & gr);
 

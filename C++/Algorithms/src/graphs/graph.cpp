@@ -3,6 +3,7 @@
 
 #include<algorithm>
 #include<iterator>
+#include<queue>
 
 //#include<iostream>
 
@@ -87,6 +88,8 @@ namespace graph
 
 		// Obtain Topological sort of transpose graph
 		auto gr_transpoce_top_sort = gr_transpoce.TopologicalSortDFS();
+		copy(begin(gr_transpoce_top_sort), end(gr_transpoce_top_sort), ostream_iterator<int>(cout, " "));
+		cout << endl;
 
 		// Do DFS for our (NOT TRANSPOCED) graph in order of topological sort of
 		// transpose graph, obtained previously
@@ -208,6 +211,74 @@ namespace graph
 				ExploreHelperTopSort(is_visited, p.first, result);
 
 		return result;
+	}
+
+	void Graph::BFS(size_t start_id)
+	{
+		vector<int> dist(GetVertexNumb(), INT_MAX);
+		dist[start_id] = 0;
+
+		queue<size_t> d;
+		d.push(start_id);
+
+		while (!d.empty())
+		{
+			size_t cur_id = d.front(); d.pop();
+			for (const auto & neighb_id : body_[cur_id])
+				if (dist[neighb_id] == INT_MAX)
+				{
+					dist[neighb_id] = dist[cur_id] + 1;
+					d.push(neighb_id);
+				}
+		}
+
+		for (size_t i = 0; i < dist.size(); ++i)
+			cout << start_id << " -> " << i << " = " << dist[i] << endl;
+	}
+
+	vector<size_t> Graph::ShortestDistance(size_t start_id, size_t end_id)
+	{
+		vector<int> dist(GetVertexNumb(), INT_MAX);
+		dist[start_id] = 0;
+		// Stores previous element (on level top in path)
+		vector<size_t> prev_el(GetVertexNumb(), 0);
+		
+		queue<size_t> d;
+		d.push(start_id);
+
+		// BFS algorithm
+		while (!d.empty())
+		{
+			size_t cur_id = d.front(); d.pop();
+			for (const auto & neighb_id : body_[cur_id])
+				if (dist[neighb_id] == INT_MAX)
+				{
+					dist[neighb_id] = dist[cur_id] + 1;
+					prev_el[neighb_id] = cur_id;
+					d.push(neighb_id);
+				}
+		}
+
+
+		if (dist[end_id] = INT_MAX)
+		{
+			cout << "Could not go from " << start_id << " vertex to " << end_id << " vertex." << endl;
+			return vector<size_t>();
+		}
+		else
+		{
+			// Construct path using prev_el array
+			list<size_t> shortest_path;
+			size_t cur_id = end_id;
+			while (cur_id != start_id)
+			{
+				shortest_path.push_front(cur_id);
+				cur_id = prev_el[cur_id];
+			}
+			shortest_path.push_front(cur_id);
+
+			return vector<size_t>(begin(shortest_path), end(shortest_path));
+		}
 	}
 
 	void Graph::AddHelper(int start, int end)
