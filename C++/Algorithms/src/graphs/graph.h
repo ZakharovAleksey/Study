@@ -26,10 +26,14 @@ namespace graph
 
 		// Algorithms
 		void DFS();
-		map<size_t, vector<int>> ConnsectedCompNumb();
+		map<size_t, vector<int>> ConnectedCompNumb();
+		map<size_t, vector<int>> StrongConnectedCompNumb();
+
 		bool IsCircleDetect();
 
 		void TopoligicalSort();
+		vector<int> TopologicalSortDFS();
+
 
 		friend ostream & operator<<(ostream & os, const Graph & gr);
 
@@ -44,6 +48,8 @@ namespace graph
 		void ExploreHelper(unordered_map<int, bool> & is_visited, int vertex_id,
 					 unordered_map<int, pair<size_t, size_t>> & times, size_t & cur_time, 
 					 bool & is_circle);
+
+		void ExploreHelperTopSort(unordered_map<int, bool> & is_visited, int vertex_id, vector<int> & top_sort_out);
 
 	private:
 		bool is_oriented_;

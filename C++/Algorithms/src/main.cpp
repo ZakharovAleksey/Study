@@ -35,33 +35,38 @@ int main()
 	//TestAll();
 
 	graph::Graph gr(true);
-	gr.Add(0, 1);
-	gr.Add(1, 2);
-	//gr.Add(2, 4);
-	gr.Add(1, 4);
-	gr.Add(4, 3);
-	gr.Add(3, 2);
-	//gr.Add(1, 3);
-	//gr.Add(1, 2);
-	//gr.Add(2, 3);
-	//gr.Add(3, 4);
-	//gr.Add(3, 0);
-	//gr.Add(3, 1);
-	//gr.Add(4, 0);
-	//gr.Add(4, 1);
-
-	//gr.Add(5, 6);
-	//gr.Add(6, 7);
-
-	//gr.Add(8, 8);
-
-
+	gr.Add(2, 1);
+	gr.Add(2, 8);
+	gr.Add(1, 7);
+	gr.Add(3, 1);
+	gr.Add(3, 8);
+	gr.Add(8, 0);
+	gr.Add(0, 3);
+	gr.Add(7, 3);
+	gr.Add(3, 4);
+	gr.Add(7, 4);
+	gr.Add(0, 5);
+	gr.Add(4, 6);
+	gr.Add(6, 5);
+	gr.Add(5, 10);
+	gr.Add(10, 6);
 
 	cout << gr;
 	cout << "v numb = " << gr.GetVertexNumb() << endl;
+
+	auto lol = gr.StrongConnectedCompNumb();
+
+	for (auto i : lol)
+	{
+		cout << i.first << ": ";
+		copy(begin(i.second), end(i.second), ostream_iterator<int>(cout, " "));
+		cout << endl;
+	}
+
+	/*cout << "v numb = " << gr.GetVertexNumb() << endl;
 	gr.DFS();
 
-	auto res = gr.ConnsectedCompNumb();
+	auto res = gr.ConnectedCompNumb();
 	for (const auto & i : res)
 	{
 		cout << i.first << ": ";
@@ -71,7 +76,9 @@ int main()
 	
 	cout << gr.IsCircleDetect() << endl;
 	
-	gr.TopoligicalSort();
+
+	cout << "----\n";
+	gr.TopoligicalSort();*/
 		
 
 	return 0;

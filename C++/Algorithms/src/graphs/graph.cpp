@@ -44,7 +44,7 @@ namespace graph
 		}
 	}
 
-	map<size_t, vector<int>> Graph::ConnsectedCompNumb()
+	map<size_t, vector<int>> Graph::ConnectedCompNumb()
 	{
 		// Mark all vertex as not visited
 		unordered_map<int, bool> is_visited;
@@ -69,6 +69,47 @@ namespace graph
 			auto it = res.find(pair.second);
 			if (it == res.end())
 				res.insert({ pair.second, {pair.first} });
+			else
+				it->second.push_back(pair.first);
+		});
+
+		return res;
+	}
+
+	map<size_t, vector<int>> Graph::StrongConnectedCompNumb()
+	{
+		// Create and fill transpoce graph
+		Graph gr_transpoce(is_oriented_);
+
+		for (const auto & p : body_)
+			for (const auto & neigb_id : p.second)
+				gr_transpoce.Add(neigb_id, p.first);
+
+		// Obtain Topological sort of transpose graph
+		auto gr_transpoce_top_sort = gr_transpoce.TopologicalSortDFS();
+
+		// Do DFS for our (NOT TRANSPOCED) graph in order of topological sort of
+		// transpose graph, obtained previously
+		unordered_map<int, bool> is_visited;
+		for (const auto & p : body_)
+			is_visited.insert({ p.first, false });
+		unordered_map<int, size_t> cc_numb;
+		size_t cur_numb = 0;
+
+		for (auto it = rbegin(gr_transpoce_top_sort); it != rend(gr_transpoce_top_sort); ++it)
+		{
+			if (!is_visited[*it])
+				Explore(is_visited, *it, cc_numb, cur_numb);
+			++cur_numb;
+		}
+
+		// Construct result
+		map<size_t, vector<int>> res;
+		for_each(begin(cc_numb), end(cc_numb), [&res](const pair<int, size_t> & pair)
+		{
+			auto it = res.find(pair.second);
+			if (it == res.end())
+				res.insert({ pair.second,{ pair.first } });
 			else
 				it->second.push_back(pair.first);
 		});
@@ -150,7 +191,23 @@ namespace graph
 		}
 
 		// Display result of topoligical sorting
-		copy(begin(res), end(res), ostream_iterator<int>(cout, " "));
+		copy(begin(res), end(res), ostream_iterator<int>(cout, ", "));
+	}
+
+	vector<int> Graph::TopologicalSortDFS()
+	{
+		vector<int> result;
+		unordered_map<int, bool> is_visited;
+		for (const auto & p : body_)
+			is_visited.insert({ p.first, false });
+
+		map<int, set<int>> b(begin(body_), end(body_));
+
+		for (const auto & p : b)
+			if (!is_visited[p.first])
+				ExploreHelperTopSort(is_visited, p.first, result);
+
+		return result;
 	}
 
 	void Graph::AddHelper(int start, int end)
@@ -206,6 +263,17 @@ namespace graph
 		times[vertex_id].second = ++cur_time;
 		// If we whant topological sorting output
 		cout << vertex_id << " ";
+	}
+
+	void Graph::ExploreHelperTopSort(unordered_map<int, bool>& is_visited, int vertex_id, vector<int>& top_sort_out)
+	{
+		is_visited[vertex_id] = true;
+
+		for (const auto & neighb_id : body_[vertex_id])
+			if (!is_visited[neighb_id])
+				ExploreHelperTopSort(is_visited, neighb_id, top_sort_out);
+
+		top_sort_out.push_back(vertex_id);
 	}
 
 	ostream & operator<<(ostream & os, const Graph & gr)
