@@ -358,4 +358,142 @@ namespace graph
 
 		return os;
 	}
+
+	bool operator<(const WeightNode & left, const WeightNode & right)
+	{
+		return left.end_id < right.end_id;
+	}
+
+	bool operator==(const WeightNode & left, const WeightNode & right)
+	{
+		return left.end_id == right.end_id;
+	}
+
+	ostream & operator<<(ostream & os, const WeightNode & wn)
+	{
+		os << wn.end_id << " (" << wn.w << ")";
+		return os;
+	}
+
+	ostream & operator<<(ostream & os, const GraphWeight & wg)
+	{
+		for_each(begin(wg.body_), end(wg.body_), [&os](const pair<size_t, set<WeightNode>> & p)
+		{
+			os << p.first << " : ";
+			copy(begin(p.second), end(p.second), ostream_iterator<WeightNode>(os, " "));
+			os << endl;
+		});
+		return os;
+	}
+
+	void GraphWeight::Add(size_t start_id, size_t end_id, int weight)
+	{
+		auto it = body_.find(start_id);
+
+		if (it == body_.end())
+			body_.insert({ start_id, {{end_id, weight}} });
+		else
+			it->second.insert({ end_id, weight });
+	}
+
+	vector<size_t> GraphWeight::ChipestPath(size_t start_id, size_t end_id)
+	{
+		vector<int> dist(body_.size(), INT_MAX);
+		vector<size_t> prev(body_.size(), 0);
+
+		DijkstraHelper(start_id, dist, prev);
+
+		if (dist[end_id] != INT_MAX)
+		{
+			list<size_t> path;
+			size_t cur_id = end_id;
+			while (cur_id != start_id)
+			{
+				path.push_front(cur_id);
+				cur_id = prev[cur_id];
+			}
+			path.push_front(start_id);
+
+			return vector<size_t>(begin(path), end(path));
+		}
+
+		return vector<size_t>();
+	}
+
+	int GraphWeight::ChipestPathCost(size_t start_id, size_t end_id)
+	{
+		vector<int> dist(body_.size(), INT_MAX);
+		vector<size_t> prev(body_.size(), 0);
+
+		DijkstraHelper(start_id, dist, prev);
+
+		return dist[end_id];
+	}
+
+	void GraphWeight::DijkstraHelper(size_t start_id, vector<int> & dist, vector<size_t> & prev)
+	{
+		//vector<int> dist(body_.size(), INT_MAX);
+		//vector<size_t> prev(body_.size(), 0);
+
+		dist[start_id] = 0;
+
+		vector<pair<int, size_t>> pq(body_.size(), pair<int, size_t>());
+		for (const auto p : body_)
+			pq[p.first] = { dist[p.first], p.first };
+
+		make_heap(begin(pq), end(pq), [](const pair<int, size_t> & left, const pair<int, size_t> & right)
+		{
+			return left.first > right.first;
+		});
+
+		while (!pq.empty())
+		{
+			size_t cur_id = begin(pq)->second; 
+			pop_heap(begin(pq), end(pq), [](const pair<int, size_t> & left, const pair<int, size_t> & right)
+			{
+				return left.first > right.first;
+			});
+			pq.pop_back();
+
+			for (const auto & cur_neigb : body_[cur_id])
+			{
+				size_t neigb_id = cur_neigb.end_id;
+				int cur_w = GetWeight(cur_id, neigb_id);
+
+				if (dist[neigb_id] > dist[cur_id] + cur_w)
+				{
+					dist[neigb_id] = dist[cur_id] + cur_w;
+					prev[neigb_id] = cur_id;
+				}
+				// Update priority because distance has been changed
+				make_heap(begin(pq), end(pq), [](const pair<int, size_t> & left, const pair<int, size_t> & right)
+				{
+					return left.first > right.first;
+				});
+			}
+		}
+
+		/*for(auto it = begin(dist); it != end(dist); ++it)
+		{
+			cout << start_id << " -> " << distance(begin(dist), it) << ": d = " << *it << endl;
+		}*/
+	}
+
+	int GraphWeight::GetWeight(size_t start_id, size_t end_id)
+	{
+		auto it = body_.find(start_id);
+
+		if (it != body_.end())
+		{
+			auto pos = find_if(begin(it->second), end(it->second), [&end_id](const WeightNode & wn)
+			{
+				return wn.end_id == end_id;
+			});
+
+			return (pos == end(it->second)) ? 0 : pos->w;
+		}
+
+		return 0;
+	}
+
 }

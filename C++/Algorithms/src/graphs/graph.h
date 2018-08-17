@@ -61,6 +61,46 @@ namespace graph
 		GraphBody body_;
 	};
 
+
+	struct WeightNode
+	{
+		size_t end_id;
+		int w;
+
+		WeightNode(size_t _end_id, int weight) : end_id(_end_id), w(weight) {}
+
+		friend bool operator<(const WeightNode & left, const WeightNode & right);
+		friend bool operator==(const WeightNode & left, const WeightNode & right);
+
+		friend ostream & operator<<(ostream & os, const WeightNode & wn);
+
+	};
+
+
+	using WeightGraphBody = unordered_map<size_t, set<WeightNode>>;
+
+	class GraphWeight
+	{
+	public:
+		GraphWeight() {}
+
+		void Add(size_t start_id, size_t end_id, int weight);
+
+		vector<size_t> ChipestPath(size_t start_id, size_t end_id);
+		int ChipestPathCost(size_t start_id, size_t end_id);
+
+		friend ostream & operator<<(ostream & os, const GraphWeight & wg);
+
+	private:
+		int GetWeight(size_t start_id, size_t end_id);
+
+		void DijkstraHelper(size_t start_id, vector<int> & dist, vector<size_t> & prev);
+
+	private:
+		WeightGraphBody body_;
+	};
+	
+
 }
 
 #endif // !GRAPH_H

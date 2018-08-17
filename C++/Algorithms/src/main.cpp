@@ -34,6 +34,9 @@ int main()
 {
 	//TestAll();
 
+	/*
+	TestGraph();
+	
 	graph::Graph gr(true);
 	gr.Add(2, 1);
 	gr.Add(2, 8);
@@ -67,7 +70,7 @@ int main()
 
 	auto shp = gr.ShortestDistance(4, 7);
 	copy(begin(shp), end(shp), ostream_iterator<size_t>(cout, " ->"));
-	cout << endl;
+	cout << endl;*/
 
 	/*cout << "v numb = " << gr.GetVertexNumb() << endl;
 	gr.DFS();
@@ -86,6 +89,26 @@ int main()
 	cout << "----\n";
 	gr.TopoligicalSort();*/
 		
+
+	graph::GraphWeight wg;
+	wg.Add(0, 1, 4);
+	wg.Add(0, 2, 2);
+	wg.Add(1, 2, 3);
+	wg.Add(2, 1, 1);
+	wg.Add(1, 3, 2);
+	wg.Add(1, 4, 3);
+	wg.Add(2, 3, 4);
+	wg.Add(2, 4, 5);
+	wg.Add(3, 3, 0);
+	wg.Add(4, 3, 1);
+
+
+	cout << wg;
+
+	auto path = wg.ChipestPath(0, 4);
+	cout << path;
+	cout << wg.ChipestPathCost(0, 4) << endl;
+
 
 	return 0;
 }
