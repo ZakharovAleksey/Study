@@ -5,9 +5,44 @@
 #include<sstream>
 #include<exception>
 
+#include<vector>
+#include<algorithm>
+
 namespace unit_test
 {
 	using namespace std;
+
+	// Ostream operator for pair<Key, Value>
+	template<class U, class V>
+	ostream & operator<<(ostream & os, const pair<U, V> & p)
+	{
+		os << p.first << " " << p.second << endl;
+		return os;
+	}
+
+	// Ostream operator for vector<T>
+	template<class T>
+	ostream & operator<<(ostream & os, const vector<T> & v)
+	{
+		std::copy(begin(v), end(v), ostream_iterator<T>(os, " "));
+		return os;
+	}
+
+	// Comparison operator for vector (Equal) : nesessary for unit_test
+	template<class T>
+	bool operator==(const vector<T> & left, const vector<T> & right)
+	{
+		return std::equal(begin(left), end(left), begin(right));
+	}
+
+	// Comparison operator for vector (Not Equal) : nesessary for unit_test
+	template<class T>
+	bool operator!=(const vector<T> & left, const vector<T> & right)
+	{
+		return !(left == right);
+	}
+
+
 
 	template<class U, class V>
 	void AssertEqual(const U & left, const V right, const string & hint)
@@ -44,6 +79,4 @@ namespace unit_test
 	private:
 		size_t failed_count_;
 	};
-
-
 }

@@ -88,8 +88,6 @@ namespace graph
 
 		// Obtain Topological sort of transpose graph
 		auto gr_transpoce_top_sort = gr_transpoce.TopologicalSortDFS();
-		copy(begin(gr_transpoce_top_sort), end(gr_transpoce_top_sort), ostream_iterator<int>(cout, " "));
-		cout << endl;
 
 		// Do DFS for our (NOT TRANSPOCED) graph in order of topological sort of
 		// transpose graph, obtained previously
@@ -144,7 +142,7 @@ namespace graph
 	{
 		if (IsCircleDetect())
 		{
-			cout << "Circle is detected: Topoligical sort is not possible." << endl;
+			clog << "HINT: Circle is detected: Topoligical sort is not possible." << endl;
 			return;
 		}
 
@@ -232,6 +230,7 @@ namespace graph
 				}
 		}
 
+		// Display BFS
 		for (size_t i = 0; i < dist.size(); ++i)
 			cout << start_id << " -> " << i << " = " << dist[i] << endl;
 	}
@@ -259,10 +258,9 @@ namespace graph
 				}
 		}
 
-
 		if (dist[end_id] = INT_MAX)
 		{
-			cout << "Could not go from " << start_id << " vertex to " << end_id << " vertex." << endl;
+			clog << "HINT: Could not go from " << start_id << " vertex to " << end_id << " vertex." << endl;
 			return vector<size_t>();
 		}
 		else
@@ -293,7 +291,6 @@ namespace graph
 
 	void Graph::Explore(unordered_map<int, bool>& is_visited, int vertex_id)
 	{
-		//cout << vertex_id << " ";
 		is_visited[vertex_id] = true;
 
 		for (const auto & neighb_id : body_[vertex_id])
@@ -321,7 +318,7 @@ namespace graph
 		for (const auto & neighb_id : body_[vertex_id])
 		{
 			auto it = times.find(neighb_id);
-			if (it != times.end() && it->second.second == 0)
+			if (it != times.end() && it->second.second == 0 && vertex_id != neighb_id)
 			{
 				is_circle = true;
 				return;
@@ -332,8 +329,6 @@ namespace graph
 		}
 
 		times[vertex_id].second = ++cur_time;
-		// If we whant topological sorting output
-		cout << vertex_id << " ";
 	}
 
 	void Graph::ExploreHelperTopSort(unordered_map<int, bool>& is_visited, int vertex_id, vector<int>& top_sort_out)
@@ -357,6 +352,69 @@ namespace graph
 		});
 
 		return os;
+	}
+
+	
+	void TestGraph()
+	{
+		{
+			Graph gr(true);
+			gr.Add(2, 1); gr.Add(2, 8);
+			gr.Add(1, 7);
+			gr.Add(3, 1); gr.Add(3, 8); gr.Add(3, 4);
+			gr.Add(8, 0);
+			gr.Add(0, 3); gr.Add(0, 5);
+			gr.Add(7, 3); gr.Add(7, 4);
+			gr.Add(4, 6);
+			gr.Add(6, 5);
+			gr.Add(5, 9);
+			gr.Add(9, 6);
+
+			unit_test::AssertEqual(10, gr.GetVertexNumb(), "Graph: number of vertexes");
+
+			auto sccn = gr.StrongConnectedCompNumb();
+			map<size_t, vector<int>> exp =
+			{
+				{0, {5, 9, 6}},
+				{1, {4}},
+				{2, {1, 8, 0, 3, 7}},
+				{3, {2}}
+			};
+
+			for (auto it = begin(sccn); it != end(sccn); ++it)
+				unit_test::AssertEqual(exp[distance(begin(sccn), it)], it->second, "Hint: Graph Strong Connected Components id = "
+					+ to_string(distance(begin(sccn), it)));
+
+			auto shd = gr.ShortestDistance(4, 7);
+			unit_test::AssertEqual(shd, vector<size_t>(), "Hint: Graph Shortest distance impossible");
+		}
+		{
+			Graph gr(true);
+			gr.Add(0, 1); gr.Add(0, 3);
+			gr.Add(1, 2); gr.Add(1, 3);
+			gr.Add(4, 5);
+			gr.Add(6, 6);
+
+			map<size_t, vector<int>> exp =
+			{
+				{ 0,{ 0, 1, 2, 3 } },
+				{ 1,{ 4, 5 } },
+				{ 2,{ 6 } }
+			};
+
+			auto ccn = gr.ConnectedCompNumb();
+			for (auto it = begin(ccn); it != end(ccn); ++it)
+				unit_test::AssertEqual(exp[distance(begin(ccn), it)], it->second, "Hint: Graph Connected Components id = "
+					+ to_string(distance(begin(ccn), it)));
+
+			unit_test::AssertEqual(false, gr.IsCircleDetect(), "Hint: Graph is circle detected false");
+			
+			auto ts = gr.TopologicalSortDFS();
+			unit_test::AssertEqual(vector<int>(rbegin(ts), rend(ts)), vector<int>{6, 4, 5, 0, 1, 3, 2}, "Hint: Graph topological sort");
+
+			gr.Add(3, 0);
+			unit_test::AssertEqual(true, gr.IsCircleDetect(), "Hint: Graph is circle detected true");
+		}
 	}
 
 	bool operator<(const WeightNode & left, const WeightNode & right)
@@ -394,6 +452,9 @@ namespace graph
 			body_.insert({ start_id, {{end_id, weight}} });
 		else
 			it->second.insert({ end_id, weight });
+
+		if (weight < 0)
+			has_negative_edge_ = true;
 	}
 
 	vector<size_t> GraphWeight::ChipestPath(size_t start_id, size_t end_id)
@@ -401,9 +462,18 @@ namespace graph
 		vector<int> dist(body_.size(), INT_MAX);
 		vector<size_t> prev(body_.size(), 0);
 
-		DijkstraHelper(start_id, dist, prev);
+		bool has_negative_circle = false;
 
-		if (dist[end_id] != INT_MAX)
+		if (!has_negative_edge_)
+			DijkstraHelper(start_id, dist, prev);
+		else
+		{
+			BelmanFordHelper(start_id, dist, prev, has_negative_circle);
+			if (has_negative_circle)
+				clog << "HINT: Your graph contains circle with negative weight." << endl;
+		}
+
+		if (!has_negative_circle && dist[end_id] != INT_MAX)
 		{
 			list<size_t> path;
 			size_t cur_id = end_id;
@@ -424,17 +494,49 @@ namespace graph
 	{
 		vector<int> dist(body_.size(), INT_MAX);
 		vector<size_t> prev(body_.size(), 0);
+		
+		bool has_negative_circle = false;
 
-		DijkstraHelper(start_id, dist, prev);
+		if (!has_negative_edge_)
+			DijkstraHelper(start_id, dist, prev);
+		else
+		{
+			BelmanFordHelper(start_id, dist, prev, has_negative_circle);
+			if (has_negative_circle)
+				clog << "HINT: Your graph contains circle with negative weight." << endl;
+		}
 
-		return dist[end_id];
+		return (has_negative_circle) ? INT_MIN : dist[end_id];
+	}
+
+	void GraphWeight::BelmanFordHelper(size_t start_id, vector<int>& dist, vector<size_t>& prev, bool & is_negative_circle)
+	{
+		dist[start_id] = 0;
+
+		for (size_t id = 0; id < body_.size() - 1; ++id)
+		{
+			// Loop throw all edges in graph and performs relaxation
+			for (const auto p : body_)
+				for(const auto & neigb : p.second)
+					if (dist[p.first] + neigb.w < dist[neigb.end_id])
+					{
+						dist[neigb.end_id] = dist[p.first] + neigb.w;
+						prev[neigb.end_id] = p.first;
+					}
+		}
+
+		// Check if negative circle is in the graph
+		for (const auto p : body_)
+			for (const auto & neigb : p.second)
+				if (dist[p.first] + neigb.w < dist[neigb.end_id])
+				{
+					is_negative_circle = true;
+					return;
+				}
 	}
 
 	void GraphWeight::DijkstraHelper(size_t start_id, vector<int> & dist, vector<size_t> & prev)
 	{
-		//vector<int> dist(body_.size(), INT_MAX);
-		//vector<size_t> prev(body_.size(), 0);
-
 		dist[start_id] = 0;
 
 		vector<pair<int, size_t>> pq(body_.size(), pair<int, size_t>());
@@ -472,11 +574,6 @@ namespace graph
 				});
 			}
 		}
-
-		/*for(auto it = begin(dist); it != end(dist); ++it)
-		{
-			cout << start_id << " -> " << distance(begin(dist), it) << ": d = " << *it << endl;
-		}*/
 	}
 
 	int GraphWeight::GetWeight(size_t start_id, size_t end_id)
@@ -496,4 +593,37 @@ namespace graph
 		return 0;
 	}
 
+	void TestWeightGraph()
+	{
+		{
+			GraphWeight wg;
+			wg.Add(0, 1, 4); wg.Add(0, 2, 2);
+			wg.Add(1, 2, 3); wg.Add(2, 1, 1);
+			wg.Add(1, 3, 2); wg.Add(1, 4, 3);
+			wg.Add(2, 3, 4); wg.Add(2, 4, 5);
+			wg.Add(3, 3, 0); wg.Add(4, 3, 1);
+
+			auto path = wg.ChipestPath(0, 4);
+			unit_test::AssertEqual(path, vector<size_t>{ 0, 2, 1, 4 }, "WeightGraph : chipest path with NO negative weights");
+			unit_test::AssertEqual(6, wg.ChipestPathCost(0, 4) , "WeightGraph : chipest path weight with NO negative weights");
+		}
+		{
+			GraphWeight wg;
+			wg.Add(0, 1, 4); wg.Add(0, 2, 3);
+			wg.Add(1, 2, -2); wg.Add(1, 3, 4);
+			wg.Add(2, 3, -3); wg.Add(2, 4, 1);
+			wg.Add(3, 4, 2); wg.Add(4, 4, 0);
+
+			auto path = wg.ChipestPath(0, 4);
+			unit_test::AssertEqual(path, vector<size_t>{ 0, 1, 2, 3, 4 }, "WeightGraph : chipest path with negative weights");
+			unit_test::AssertEqual(1, wg.ChipestPathCost(0, 4), "WeightGraph : chipest path weight with negative weights");
+
+			// Add negative circle
+			wg.Add(3, 1, -1);
+
+			path = wg.ChipestPath(0, 4);
+			unit_test::AssertEqual(path, vector<size_t>(), "WeightGraph : chipest path with negative loop");
+			unit_test::AssertEqual(INT_MIN, wg.ChipestPathCost(0, 4), "WeightGraph : chipest path weight with negative loop");
+		}
+	}
 }

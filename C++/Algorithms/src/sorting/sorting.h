@@ -10,37 +10,6 @@
 #include <random>
 #include <chrono>
 
-// Ostream operator for pair<Key, Value>
-template<class U, class V>
-std::ostream & operator<<(std::ostream & os, const std::pair<U, V> & p)
-{
-	os << p.first << " " << p.second << endl;
-	return os;
-}
-
-// Ostream operator for vector<T>
-template<class T>
-std::ostream & operator<<(std::ostream & os, const std::vector<T> & v)
-{
-	std::ostream_iterator<T> out_it(os, " ");
-	std::copy(begin(v), end(v), out_it);
-	return os;
-}
-
-// Comparison operator for vector (Equal) : nesessary for unit_test
-template<class T>
-bool operator==(const std::vector<T> & left, const std::vector<T> & right)
-{
-	return std::equal(begin(left), end(left), begin(right));
-}
-
-// Comparison operator for vector (Not Equal) : nesessary for unit_test
-template<class T>
-bool operator!=(const std::vector<T> & left, const std::vector<T> & right)
-{
-	return !(left == right);
-}
-
 namespace sort
 {
 	using namespace std;
