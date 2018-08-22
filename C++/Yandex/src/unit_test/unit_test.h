@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+#include <stdexcept>
 #include <sstream>
 #include <exception>
 #include <string>
@@ -19,7 +20,9 @@ namespace unit_test
 		if (right != left)
 		{
 			ostringstream os;
-			os << left << " != " << right << " Hint: " << hint;
+			os << left << " != " << right;
+			if (!hint.empty())
+				os << " Hint: " << hint;
 			throw runtime_error(os.str());
 		}
 	}
@@ -44,11 +47,29 @@ namespace unit_test
 				++fail_count_;
 				cerr << test_name << " failed. Error: " << e.what() << endl;
 			}
+			catch (...)
+			{
+				++fail_count_;
+				cerr << test_name << " failed with Unknown error." << endl;
+			}
 		}
 
 	private:
 		size_t fail_count_;
 	};
 }
+
+
+#define ASSERT_EQUAL(left, right) {					\
+	ostringstream os;								\
+	os << #left << " != " << #right << ", "			\
+	<< __FILE__ << ": line " << __LINE__ << endl;	\
+	unit_test::AssertEqual(left, right, os.str());	\
+}
+
+#define RUN_TEST(test_runner, test_func){			\
+	test_runner.RunTest(test_func, #test_func);		\
+}
+
 
 #endif // !UNIT_TEST_H

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-string ParseEvent(istream& in);
+string ParseEvent(istream& in) { return ""; }
 
 int main_test_flow(const string& input, ostream& out){
         Database db;
