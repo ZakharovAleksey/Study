@@ -10,9 +10,23 @@
 #include <exception>
 #include <string>
 
+#include<vector>
+#include<algorithm>
+#include<iterator>
+
 namespace unit_test
 {
 	using namespace std;
+
+	template<class T>
+	ostream & operator<<(ostream & os, const vector<T> & v)
+	{
+		for (const auto & o : v)
+			os << o << " ";
+		os << endl;
+		//copy(begin(v), end(v), std::ostream_iterator<T>(os, " "));
+		return os;
+	}
 
 	template<class T, class U>
 	void AssertEqual(const T & left, const U & right, const string hint)
@@ -60,11 +74,11 @@ namespace unit_test
 }
 
 
-#define ASSERT_EQUAL(left, right) {					\
-	ostringstream os;								\
-	os << #left << " != " << #right << ", "			\
-	<< __FILE__ << ": line " << __LINE__ << endl;	\
-	unit_test::AssertEqual(left, right, os.str());	\
+#define ASSERT_EQUAL(left, right) {						\
+	ostringstream os_lol;								\
+	os_lol << #left << " != " << #right << ", "			\
+	<< __FILE__ << ": line " << __LINE__ << endl;		\
+	unit_test::AssertEqual(left, right, os_lol.str());	\
 }
 
 #define RUN_TEST(test_runner, test_func){			\
