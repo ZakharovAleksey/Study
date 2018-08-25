@@ -81,6 +81,14 @@ namespace unit_test
 	unit_test::AssertEqual(left, right, os_lol.str());	\
 }
 
+#define ASSERT(left){									\
+	ostringstream os_lol;								\
+	os_lol << #left << " != " << "true" << ", "			\
+	<< __FILE__ << ": line " << __LINE__ << endl;		\
+	unit_test::AssertEqual(left, true, os_lol.str());	\
+}
+
+
 #define RUN_TEST(test_runner, test_func){			\
 	test_runner.RunTest(test_func, #test_func);		\
 }

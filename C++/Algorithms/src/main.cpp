@@ -29,10 +29,25 @@ using namespace practice;
 
 void TestAll();
 
+void MegreSortNonReq(vector<int> & v)
+{
+	for (size_t i = 1; i < static_cast<size_t>(log2(v.size())) + 1; ++i)
+	{
+		auto cur_it = begin(v); size_t cur_step = (size_t)pow(2, i);
+		while (cur_it != end(v))
+		{
+			inplace_merge ( cur_it, cur_it + cur_step / 2, cur_it + cur_step );
+			cur_it += cur_step;
+		}
+	}
+}
+
 
 int main() 
 {
-	TestAll();
+	vector<int> v = { 5, 6, 3, 2, 7, 8, 0, 1};
+	MegreSortNonReq(v);
+	//TestAll();
 
 	return 0;
 }
