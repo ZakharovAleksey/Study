@@ -207,11 +207,6 @@ namespace week_1
 		}
 	};
 
-	// Нужна чтобы не писать долгий тип, 
-	// типа вместо IterRange<vector<int>::iterator> a = {v.begin(), v.end() + v.size() / 2};
-	// таписаь auto a = {v.begin(), v.end() + v.size() / 2}; Т.к. непонятно что это вообще такое
-	// можно написать auto a = MakeRange(v.begin(), v.end() + v.size() / 2);
-	// таким образом мы СПРЯТАЛИ тип, внутрб ыункции так как компилятор может сам его определять
 	template<class It>
 	ItRange<It> MakeRange(It first, It second)
 	{

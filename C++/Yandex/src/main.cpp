@@ -42,42 +42,53 @@ private:
 //--------------------------------------------------------------
 using namespace week_2;
 
-void Test()
-{
-	// BookManager ReadingManager
-	BookManager bm;
-	ASSERT_EQUAL(0, bm.Cheer(5));
-	bm.Read(1, 10);
-	ASSERT_EQUAL(1., bm.Cheer(1));
-	bm.Read(2, 5);
-	bm.Read(3, 7);
-	ASSERT_EQUAL(0, bm.Cheer(2));
-	ASSERT_EQUAL(0.5, bm.Cheer(3));
-	bm.Read(3, 10);
-	ASSERT_EQUAL(0.5, bm.Cheer(3));
-	bm.Read(3, 11);
-	ASSERT_EQUAL(1., bm.Cheer(3));
-	ASSERT_EQUAL(0.5, bm.Cheer(1));
-	bm.Read(11, 10);
-	bm.Read(12, 5);
-	bm.Read(13, 11);
-	ASSERT_EQUAL(0., bm.Cheer(2));
-	ASSERT_EQUAL(0., bm.Cheer(12));
-	ASSERT_EQUAL(2./5., bm.Cheer(1));
-	ASSERT_EQUAL(2./5., bm.Cheer(11));
-	ASSERT_EQUAL(4./5., bm.Cheer(3));
-	ASSERT_EQUAL(4./5., bm.Cheer(13));
-	ASSERT_EQUAL(0., bm.Cheer(5));
+
+
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void TestConstruction() {
+	SimpleVector<int> empty;
+	ASSERT_EQUAL(empty.Size(), 0u);
+	ASSERT_EQUAL(empty.Capacity(), 0u);
+	ASSERT(empty.begin() == empty.end());
+
+	SimpleVector<string> five_strings(5);
+	ASSERT_EQUAL(five_strings.Size(), 5u);
+	ASSERT(five_strings.Size() <= five_strings.Capacity());
+	for (auto& item : five_strings) {
+		ASSERT(item.empty());
+	}
+	five_strings[2] = "Hello";
+	ASSERT_EQUAL(five_strings[2], "Hello");
+}
+
+void TestPushBack() {
+	SimpleVector<int> v;
+	for (int i = 10; i >= 1; --i) {
+		v.PushBack(i);
+		ASSERT(v.Size() <= v.Capacity());
+	}
+	sort(begin(v), end(v));
+	for (auto i : v)
+		cout << i << " ";
+	cout << endl;
+
+	const vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	ASSERT_EQUAL(v.Size(), expected.size());
+	ASSERT(equal(begin(v), end(v), begin(expected)));
+
+
+	SimpleVector<string> lol;
 
 }
 
-
 int main() {
 	TestRunner tr;
-	//RUN_TEST(tr, Test);
-
-	int i = 1'000'000'000;
-	cout << i << endl;
-
+	RUN_TEST(tr, TestConstruction);
+	RUN_TEST(tr, TestPushBack);
 	return 0;
 }
