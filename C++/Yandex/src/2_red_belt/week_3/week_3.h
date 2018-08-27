@@ -165,4 +165,93 @@ namespace week_3
 
 #pragma endregion
 
+#pragma region Односвязный список
+
+	template <typename T>
+	class LinkedList {
+	public:
+		struct Node {
+			T value;
+			Node* next = nullptr;
+
+			Node(T _value) : value(_value), next(nullptr) {}
+		};
+
+		LinkedList() : root_(nullptr) {}
+
+		~LinkedList() {
+			while (root_) {
+				PopFront();
+			}
+		}
+
+		void PushFront(const T& value) {
+			if (!root_)
+				root_ = new Node(value);
+			else
+			{
+				Node* new_root = new Node(value);
+				new_root->next = root_;
+				root_ = new_root;
+			}
+		}
+
+		void InsertAfter(Node* node, const T& value) {
+			if (!node) {
+				PushFront(value);
+				return;
+			}
+
+			Node* next_node = new Node(value);
+			next_node->next = node->next;
+			node->next = next_node;
+		}
+
+		void RemoveAfter(Node* node) {
+			if (!node) {
+				PopFront();
+				return;
+			}
+			if (!node->next)
+				return;
+
+			Node* new_next = node->next->next;
+			delete node->next;
+			node->next = new_next;
+		}
+
+		void PopFront() {
+			if (!root_)
+				return;
+			Node* old_root = root_;
+			root_ = root_->next;
+			delete old_root;
+
+			if (!root_)
+				root_ = nullptr;
+		}
+
+		Node* GetHead() { return root_; }
+		const Node* GetHead() const { return root_; }
+
+		template<class U>
+		friend ostream & operator<<(ostream & os, const LinkedList<U> & l)
+		{
+			auto cur_node = l.GetHead();
+			while (cur_node)
+			{
+				os << cur_node->value << " ";
+				cur_node = cur_node->next;
+			}
+			os << endl;
+			return os;
+		}
+
+	private:
+		Node* root_ = nullptr;
+	};
+
+
+#pragma endregion
+
 }

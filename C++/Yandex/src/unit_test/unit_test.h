@@ -41,6 +41,13 @@ namespace unit_test
 		}
 	}
 
+
+	template<class T>
+	void Assert(const T & left, const string hint)
+	{
+		AssertEqual(left, true, hint);
+	}
+
 	class TestRunner
 	{
 	public:
