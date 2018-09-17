@@ -10,18 +10,11 @@ using namespace unit_test;
 using namespace log_time;
 
 //--------------------------------------------------------------
-using namespace week_2;
 
-#include<iterator>
-
-#include<fstream>
-
-	
 int main() {
 	TestRunner tr;
 	// TODO
 	//RUN_TEST(tr, week_2::TestHotelManager);
-
 	
 	return 0;
 }

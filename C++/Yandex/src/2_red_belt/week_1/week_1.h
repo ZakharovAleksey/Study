@@ -183,8 +183,7 @@ namespace week_1
 
 #pragma endregion
 
-	
-	// Pair of iterators 
+	// Range class based on pair of iterators
 	template<class It>
 	class ItRange
 	{
@@ -219,13 +218,15 @@ namespace week_1
 		return MakeRange(begin(body), next(begin(body), min(size, body.size())));
 	}
 
+#pragma region Шаблон Paginator
+
 	template<class It>
 	class Paginator
 	{
 	public:
 		Paginator(It beg, It end, size_t page_size)
 		{
-			size_t pages_count = static_cast<size_t> (ceil( (double) distance(beg, end) / page_size));
+			size_t pages_count = static_cast<size_t> (ceil((double)distance(beg, end) / page_size));
 			pages_.reserve(pages_count);
 
 			for (size_t page_id = 0; page_id < pages_count; ++page_id)
@@ -233,11 +234,11 @@ namespace week_1
 				It start = beg + page_id * page_size;
 				size_t cur_page_size = (distance<It>(start, end) < page_size) ? distance<It>(start, end) : page_size;
 
-				pages_.push_back( MakeRange(start, start + cur_page_size));
+				pages_.push_back(MakeRange(start, start + cur_page_size));
 			}
 		}
 
-		auto begin()  {
+		auto begin() {
 			return pages_.begin();
 		}
 
@@ -259,10 +260,28 @@ namespace week_1
 		return Paginator<It>(beg, end, page_size);
 	}
 
-	template <typename Container> 
+	template <typename Container>
 	auto  Paginate(Container & c, size_t page_size)
 	{
-		return MakePaginator( c.begin(), c.end(), page_size );
+		return MakePaginator(c.begin(), c.end(), page_size);
 	}
+
+#pragma endregion
+
+#pragma region Плохой Макрос
+
+#define PRINT_VALUES(out, x, y) out << (x) << endl << (y) << endl
+
+#pragma endregion
+
+#pragma region Макрос UNIQ_ID
+
+#define UNIQ_ID_IMPL(lineno) _a_local_var_##lineno
+#define UNIQ_ID_CREATE(lineno) UNIQ_ID_IMPL(lineno)
+#define UNIQ_ID UNIQ_ID_CREATE(__LINE__)
+
+#pragma endregion
+
+
 }
 
