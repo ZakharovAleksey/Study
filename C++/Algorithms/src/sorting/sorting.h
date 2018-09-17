@@ -322,6 +322,53 @@ namespace sort
 	void CountingSort(vector<int> & v);
 	void CountingSortInter(vector<int>::iterator range_begin, vector<int>::iterator range_end);
 
+	template<class T>
+	void CountSort(vector<T> & v) {
+		T n_max = *max_element(begin(v), end(v));
+		vector<size_t> position(static_cast<size_t>(n_max + 1), 0);
+		vector<T> output(v.size(), T());
+
+		// Calculate number of each element
+		for (auto i : v)
+			++position[i];
+
+		// Caclulate how many elements are less than current
+		for (size_t i = 1; i < position.size(); ++i) {
+			position[i] += position[i - 1];
+		}
+
+		// Fill the output array
+		for (size_t i = 0; i < v.size(); ++i) {
+			output[position[v[i]] - 1] = v[i];
+			--position[v[i]];
+		}
+
+		copy(begin(output), end(output), begin(v));
+	}
+
+	template<class T>
+	void CountSortHelper(vector<T> & v, T denumenator = T(1)) {
+		vector<size_t> position(10u, 0);
+		vector<T> output(v.size(), T());
+
+		// Calculate number of each element
+		for (auto i : v)
+			++position[(i / denumenator) % 10];
+
+		// Caclulate how many elements are less than current
+		for (size_t i = 1; i < position.size(); ++i) {
+			position[i] += position[i - 1];
+		}
+
+		// Fill the output array
+		for (size_t i = v.size() - 1; i >= 0; i--) {
+			output[position[(v[i] / denumenator) % 10] - 1] = v[i];
+			--position[(v[i] / denumenator) % 10];
+		}
+
+		copy(begin(output), end(output), begin(v));
+	}
+
 	void CountingSortTest();
 
 #pragma endregion

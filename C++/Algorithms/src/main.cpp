@@ -42,11 +42,22 @@ void MegreSortNonReq(vector<int> & v)
 	}
 }
 
+template<class T>
+void RadixSort(vector<T> & v) {
+	size_t max = static_cast<size_t> (*max_element(begin(v), end(v)));
+
+	for (size_t i = 1; max / i > 0; i *= 10) {
+		CountSortHelper(v, int(i));
+		cout << i << endl;
+	}
+}
 
 int main() 
 {
-	vector<int> v = { 5, 6, 3, 2, 7, 8, 0, 1};
-	MegreSortNonReq(v);
+	vector<int> v = { 15, 6, 63, 12, 7, 8, 90, 51, 25, 15};
+	RadixSort(v);
+	cout << v << endl;
+	//MegreSortNonReq(v);
 	//TestAll();
 
 	return 0;
