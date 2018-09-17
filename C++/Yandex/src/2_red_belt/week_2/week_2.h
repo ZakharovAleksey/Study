@@ -14,9 +14,9 @@
 
 namespace week_2
 {
-#pragma once
-
 	using namespace std;
+
+#pragma region Словарь
 
 	class Learner {
 	private:
@@ -41,6 +41,7 @@ namespace week_2
 		}
 	};
 
+#pragma endregion
 
 #pragma region Экспрессы
 
@@ -107,7 +108,6 @@ namespace week_2
 
 #pragma endregion
 
-
 #pragma region Электронная книга
 
 	class BookManager
@@ -163,40 +163,108 @@ namespace week_2
 
 #pragma endregion
 
+	// TODO
 
 #pragma region Система бронирования отелей
 
 	class HotelManager
 	{
 	public:
-		HotelManager() : current_time_(0) {}
 
-		void Book(int32_t time, const string & hotel_name, size_t client_id, size_t room_count) 
+		struct Order
 		{
+			int64_t time;
+			uint32_t client_id;
+			uint16_t room_count;
+			string hotel_name;
+
+			Order(int64_t time, uint32_t client_id, uint16_t room_count, string hotel_name) : 
+				time(time), 
+				client_id(client_id), 
+				room_count(room_count), 
+				hotel_name(hotel_name) {}
+		};
+
+		HotelManager(size_t Q) : current_time_(0), order_id(0u), start_id(0u) {
+			orders_.reserve(Q);
+			reserved_clients_.reserve(Q);
+			reserved_rooms_.reserve(Q);
+		}
+
+		void Book(int64_t time, const string & hotel_name, uint32_t client_id, uint16_t room_count) 
+		{
+			if (room_count == 0) {
+				return;
+			}
+
 			current_time_ = time;
+			orders_.push_back({ time, client_id, room_count, hotel_name });
+
+			RemoveOld();
+			
+			// Add client id
+			auto it = reserved_clients_.find(hotel_name);
+			if (it == reserved_clients_.end())
+				reserved_clients_.insert({ hotel_name, {client_id} });
+			else
+				it->second.insert(client_id);
+
+			// Add room count
+			auto room_it = reserved_rooms_.find(hotel_name);
+			if (room_it == reserved_rooms_.end())
+				reserved_rooms_.insert({ hotel_name, room_count });
+			else
+				room_it->second += static_cast<uint64_t>(room_count);
+
 		}
 
-		int Clients(const string hotel_name)
+		size_t Clients(const string hotel_name)
 		{
-			
+			auto it = reserved_clients_.find(hotel_name);
+
+			return (it == end(reserved_clients_)) ? 0 : it->second.size();
 		}
 
-		int Rooms(const string hotel_name)
+		uint64_t Rooms(const string hotel_name)
 		{
-			
+			auto it = reserved_rooms_.find(hotel_name);
+
+			return (it == end(reserved_rooms_)) ? 0 : it->second;
 		}
 
 	private:
-		static const int MAX_CLIENT_COUNT = 1'000'000'000;
-		static const int32_t DAY_TIME = 86'400;
+		void RemoveOld()
+		{
+			size_t new_start_id = start_id;
+			while (orders_[new_start_id].time <= current_time_ - DAY_TIME)
+				++new_start_id;
 
-		int32_t current_time_;
-		deque<int> a;
-		unordered_map<string, size_t> reserved_clients_;	// Имя отлея и число различных клиентов бронировавших номера в этом отеле
-		unordered_map<string, size_t> reserved_rooms_;		// Число номерв забронированном в этом отеле за полсдение сутки
+			for (size_t i = start_id; i != new_start_id; ++i)
+			{
+				reserved_clients_[orders_[i].hotel_name].erase(orders_[i].client_id);
+				reserved_rooms_[orders_[i].hotel_name] -= static_cast<uint64_t>(orders_[i].room_count);
+			}
+
+			start_id = new_start_id;
+		}
+
+	private:
+		static const int MAX_COUNT = 100'000;
+		static const int64_t DAY_TIME = 86'400;
+
+		int64_t current_time_;
+		size_t order_id;
+		size_t start_id;
+
+		vector<Order> orders_;	// id of operation ond order
+		unordered_map<string, set<uint32_t>> reserved_clients_;	// Имя отлея и число различных клиентов бронировавших номера в этом отеле
+		unordered_map<string, uint64_t> reserved_rooms_;		// Число номерв забронированном в этом отеле за полсдение сутки
 	};
 
-#pragma endregion
+	void TestHotelManager();
 
+	void MainHotelManagerFunc();
+
+#pragma endregion
 
 }

@@ -36,7 +36,9 @@ set(
 	"2_red_belt/week_5/week_5.h"
 	"2_red_belt/week_5/week_5.cpp"
 	"unit_test/unit_test.h"
-	"unit_test/unit_test.cpp"	
+	"unit_test/unit_test.cpp"
+	"time_logger/time_logger.h"
+	"time_logger/time_logger.cpp"
 	"main.cpp"
 )
 

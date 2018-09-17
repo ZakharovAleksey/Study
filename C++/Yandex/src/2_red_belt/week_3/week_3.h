@@ -116,6 +116,26 @@ namespace week_3
 		SimpleVector() : body_(nullptr), capacity_(0u), size_(0u) {}
 		explicit SimpleVector(size_t size) : body_(new T[size]), capacity_(size), size_(size) {}
 
+		SimpleVector(const SimpleVector<T> & other) : 
+			body_(new T[other.capacity_]), 
+			capacity_(other.capacity_), 
+			size_(other.size_) 
+		{
+			copy(other.begin(), other.end(), begin());
+		}
+
+		SimpleVector & operator=(const SimpleVector<T> & other)
+		{
+			if (this != &other) {
+				SimpleVector tmp(other);
+				swap(body_, tmp.body_);
+				swap(capacity_, tmp.capacity_);
+				swap(size_, tmp.size_);
+			}
+
+			return *this;
+		}
+
 		~SimpleVector() {
 			delete[] body_;
 		}
@@ -124,8 +144,21 @@ namespace week_3
 			return body_[index];
 		}
 
-		T* begin() { return body_; }
-		T* end() { return body_ + size_; }
+		T* begin() { 
+			return body_; 
+		}
+
+		T* const begin() const { 
+			return body_;
+		}
+
+		T* end() { 
+			return body_ + size_;
+		}
+
+		T* const end() const {
+			return body_ + size_;
+		}
 
 		size_t Size() const {
 			return size_;
