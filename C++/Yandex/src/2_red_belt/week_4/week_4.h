@@ -121,5 +121,64 @@ namespace week_4
 
 #pragma endregion
 
+#pragma region AirportCounter
+
+	// Фишка в том, что у enum class можно созранить ее размер в ПОЛЕ Last_
+	// И этот размер известен на этапе компиляции. 
+	// !!! Поэтому можно создать массив array<size_t, enum::Last_> !!!
+
+	// TAirport should be enum with sequential items and last item TAirport::Last_
+	template <typename TAirport>
+	class AirportCounter {
+	public:
+		AirportCounter() {
+			fill(body_.begin(), body_.end(), 0u);
+		}
+
+		template <typename TIterator>
+		AirportCounter(TIterator begin, TIterator end) {
+			fill(body_.begin(), body_.end(), 0u);
+			for_each(begin, end, [&](const TAirport & airport) {
+				++body_[static_cast<size_t>(airport)];
+			});
+		}
+
+
+		size_t Get(TAirport airport) const {
+			return body_[static_cast<size_t>(airport)];
+		}
+
+
+		void Insert(TAirport airport) {
+			++body_[static_cast<size_t>(airport)];
+		}
+
+		void EraseOne(TAirport airport) {
+			--body_[static_cast<size_t>(airport)];
+		}
+
+
+		void EraseAll(TAirport airport) {
+			body_[static_cast<size_t>(airport)] = 0u;
+		}
+
+		using Item = pair<TAirport, size_t>;
+		using Items = array<Item, static_cast<size_t>(TAirport::Last_)>;
+
+		Items GetItems() const {
+			Items tmp;
+			for (size_t i = 0; i < body_.size(); ++i) {
+				tmp[i] = { TAirport(i), body_[i] };
+			}
+			return tmp;
+		}
+
+	private:
+		array<size_t, static_cast<size_t>(TAirport::Last_)> body_;
+	};
+
+
+#pragma endregion
+
 
 }
