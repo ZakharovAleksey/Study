@@ -1,16 +1,16 @@
 #pragma once
 
-#include<vector>
-#include<list>
-#include<array>
 #include<unordered_map>
+#include<vector>
+#include<deque>
+#include<array>
+#include<list>
 
 #include<algorithm>
 #include<iterator>
 
 #include<iostream>
 #include <stdexcept> 
-
 
 namespace week_4
 {
@@ -180,5 +180,38 @@ namespace week_4
 
 #pragma endregion
 
+#pragma region Текстовый редактор
+
+	static const size_t MAX_SIZE = 1'000u; // 1'000'000u;
+
+	class Editor {
+	public:
+		Editor() : cur_buf_size_(0u) {
+			start_buf_.reserve(MAX_SIZE);
+		}
+
+		void Left();
+		void Right();
+
+		void Insert(char token);
+		void Copy(size_t tokens);
+		void Cut(size_t tokens);
+		void Paste();
+
+		string GetText() const;
+
+	private:
+		// Part of the string before the cursor
+		vector<char> start_buf_;
+		// Part of the string after the cursor
+		deque<char> end_buf_;
+
+		// Buffer (store cut/copy substrings of text)
+		array<char, MAX_SIZE> buffer_;
+		size_t cur_buf_size_;
+	};
+
+
+#pragma endregion
 
 }
