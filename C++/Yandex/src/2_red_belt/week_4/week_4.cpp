@@ -45,5 +45,43 @@ namespace week_4 {
 		return string(begin(start_buf_), end(start_buf_)) + string(begin(end_buf_), end(end_buf_));
 	}
 
+	/* 
+		This region is the correct solution of Translator task, but I have not gon C++ 17 compiler yet :(
 
+	void Translator::Add(string_view source, string_view target) {
+		auto for_it = forward_.find(string(source));
+
+		if (for_it == forward_.end()) {
+			forward_[string(source)] = string(target);
+
+			auto cur = forward_.find(string(source));
+			backward_[string_view(cur->second)] = string_view(cur->first);
+		}
+		else {
+			for_it->second = string(target);
+
+			backward_[string_view(for_it->second)] = string_view(for_it->first);
+
+		}
+	}
+
+	string_view Translator::TranslateForward(string_view source) const {
+		auto it = forward_.find(string(source));
+		if (it == end(forward_)) {
+			return string();
+		}
+
+		return it->second;
+	}
+
+	string_view Translator::TranslateBackward(string_view target) const {
+		auto it = backward_.find(target);
+		if (it == end(backward_)) {
+			return string();
+		}
+
+		return it->second;
+	}
+
+	*/
 }

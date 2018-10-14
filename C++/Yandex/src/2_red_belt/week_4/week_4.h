@@ -18,8 +18,7 @@ namespace week_4
 
 #pragma region Спортсмены
 
-	void SportsmenSolver()
-	{
+	void SportsmenSolver() {
 		size_t numb = 0; cin >> numb;
 
 		list<int> real_queue;
@@ -177,6 +176,29 @@ namespace week_4
 		array<size_t, static_cast<size_t>(TAirport::Last_)> body_;
 	};
 
+
+#pragma endregion
+
+#pragma region Переводчик
+
+	// The main idea is to store copies of <source,target> words in one unorderred map, while in
+	// second unordered map for backward translation we store string_views (references) on 
+	// real string from forward unordered map.
+
+	class Translator {
+	public:
+		Translator() {}
+
+		/*
+		void Add(string_view source, string_view target);
+		string_view TranslateForward(string_view source) const;
+		string_view TranslateBackward(string_view target) const;
+		*/
+
+	private:
+		unordered_map<string, string> forward_;
+		//unordered_map<string_view, string_view> backward_;
+	};
 
 #pragma endregion
 
