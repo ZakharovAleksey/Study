@@ -179,7 +179,7 @@ namespace week_4
 
 #pragma endregion
 
-#pragma region Переводчик
+#pragma region Translator
 
 	// The main idea is to store copies of <source,target> words in one unorderred map, while in
 	// second unordered map for backward translation we store string_views (references) on 
@@ -202,7 +202,7 @@ namespace week_4
 
 #pragma endregion
 
-#pragma region Текстовый редактор
+#pragma region Editor
 
 	static const size_t MAX_SIZE = 1'000u; // 1'000'000u;
 

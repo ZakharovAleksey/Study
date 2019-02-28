@@ -13,7 +13,7 @@
 
 using namespace std;
 
-#pragma region “рекер задач
+#pragma region Task 1
 
 	/*
 		–еализуйте класс TeamTasks, позвол€ющий хранить статистику по статусам задач команды разработчиков.

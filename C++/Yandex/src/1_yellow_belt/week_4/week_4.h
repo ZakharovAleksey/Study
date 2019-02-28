@@ -7,13 +7,13 @@
 
 using namespace std;
 
-#pragma region Часть вектора
+#pragma region task 1
 
 void PrintVectorPart(const vector<int>& numbers);
 
 #pragma endregion
 
-#pragma region Часть множества
+#pragma region task 2
 
 template <typename T>
 vector<T> FindGreaterElements(const set<T>& elements, const T& border)
@@ -29,13 +29,13 @@ vector<T> FindGreaterElements(const set<T>& elements, const T& border)
 
 #pragma endregion
 
-#pragma region Разбиение на слова
+#pragma region task 3
 
 vector<string> SplitIntoWords(const string& s);
 
 #pragma endregion
 
-#pragma region Удаление повторов
+#pragma region task 4
 
 template <typename T>
 void RemoveDuplicates(vector<T>& elements)
@@ -47,13 +47,13 @@ void RemoveDuplicates(vector<T>& elements)
 
 #pragma endregion
 
-#pragma region Перебор перестановок
+#pragma region task 5
 
 void LexicographicallyRearrangement();
 
 #pragma endregion
 
-#pragma region Демографические показатели
+#pragma region task 6
 
 enum class Gender {
 	FEMALE,
@@ -86,7 +86,7 @@ void PrintStats(vector<Person> persons);
 
 #pragma endregion
 
-#pragma region Сортировка слиянием
+#pragma region task 7
 
 // Additional my Merge function implementation
 template <typename RandomIt>
@@ -168,13 +168,13 @@ void MergeSortDiv3(RandomIt range_begin, RandomIt range_end)
 
 #pragma endregion
 
-#pragma region Ближайший сосед
+#pragma region task 8
 
 set<int>::const_iterator FindNearestElement(const set<int>& numbers, int border);
 
 #pragma endregion
 
-#pragma region Имена и фамилии 
+#pragma region task 9
 
 namespace t
 {
@@ -195,7 +195,7 @@ namespace t
 }
 #pragma endregion
 
-#pragma region Группировка строк по префиксу
+#pragma region task 10
 	
 template <typename RandomIt>
 pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end, char prefix)
@@ -218,7 +218,7 @@ pair<RandomIt, RandomIt> FindStartsWith(RandomIt range_begin, RandomIt range_end
 
 #pragma endregion
 
-#pragma region Построение арифметического выражения
+#pragma region task 11
 
 void ConstructEquationBySymbols();
 
