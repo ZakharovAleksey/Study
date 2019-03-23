@@ -5,6 +5,8 @@ using namespace std;
 using namespace unit_test;
 using namespace log_time;
 
+using namespace std;
+
 int main() {
 	TestRunner tr;
 

@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.5)
 
 set(
 	source_list
+	"0_white_belt/week_1/week_1.h"
+	"0_white_belt/week_1/week_1.cpp"
+	"0_white_belt/week_2/week_2.h"
+	"0_white_belt/week_2/week_2.cpp"
+	"0_white_belt/week_3/week_3.h"
+	"0_white_belt/week_3/week_3.cpp"
+	"0_white_belt/week_4/week_4.h"
+	"0_white_belt/week_4/week_4.cpp"
+	"0_white_belt/week_5/week_5.h"
+	"0_white_belt/week_5/week_5.cpp"
 	"1_yellow_belt/week_1/week_1.h"
 	"1_yellow_belt/week_1/week_1.cpp"
 	"1_yellow_belt/week_2/week_2.h"
