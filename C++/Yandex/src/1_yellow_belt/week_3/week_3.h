@@ -3,7 +3,7 @@
 
 #pragma once
 
-#pragma region –еализовать функции, объ€вленные в заголовочном файле
+#pragma region Sum task
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ void Sort(vector<int>& nums);
 
 #pragma endregion
 
-#pragma region –еализовать класс, объ€вленный в заголовочном файле
+#pragma region Phone number task
 
 #include <string>
 
