@@ -43,13 +43,36 @@ StringVector PalindromFilter(const StringVector & words, int minLength) {
   return res;
 }
 
+
+void UpdateIfGreater(int first, int& second) {
+	if (first > second) {
+		second = first;
+	}
+}
+
+void MoveString(StringVector& source, StringVector& destination) {
+	for (auto & w : source) {
+		destination.push_back(w);
+	}
+	source.clear();
+}
+
+void Reverse(vector<int>& v) {
+	std::reverse(begin(v), end(v));
+}
+
+
+vector<int> Reversed(const vector<int>& v)
+{
+	return vector<int>(rbegin(v), rend(v));
+}
+
 int main() {
 	TestRunner tr;
-
-  StringVector in = { "weew", "bro", "code" };
-  auto res = PalindromFilter(in, 2);
-  copy(begin(res), end(res), std::ostream_iterator<std::string>(std::cout, " "));
-  cout << endl;
+	vector<int> v = { 1, 2, 3, 4 };
+	vector<int> r = Reversed(v);
+	copy(begin(r), end(r), ostream_iterator<int>(cout, " "));
+	cout << endl;
 
 	return 0;
 }
