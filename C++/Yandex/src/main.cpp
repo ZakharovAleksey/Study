@@ -70,77 +70,67 @@ private:
 class Person {
 public:
 	void ChangeFirstName(int year, const string& first_name) {
-		d_firstName[year] = first_name;
+		d_fName[year] = first_name;
 	}
 	void ChangeLastName(int year, const string& last_name) {
-		d_lastName[year] = last_name;
+		d_lName[year] = last_name;
 	}
 	string GetFullName(int year) {
-		auto iterFN = d_firstName.lower_bound(year);
-		auto iterLN = d_lastName.lower_bound(year);
+    auto lb_first_name = d_fName.upper_bound(year);
+    auto lb_last_name = d_lName.upper_bound(year);
 
-		if (iterFN == end(d_firstName) && iterLN == end(d_lastName) ){
-			return "Incognito";
-		}
-		else if (iterFN == end(d_firstName)) {
-			if (iterLN->first == year) {
-				return iterLN->second + " with unknown first name";
-			}
-			else if (iterLN != begin(d_firstName)) {
-				return prev(iterLN)->second + " with unknown first name";
-			}
-		}
-		else if (iterLN == end(d_lastName)) {
-			if (iterFN->first == year) {
-				return iterFN->second + " with unknown last name";
-			}
-			else if (iterFN != begin(d_lastName)) {
-				return prev(iterFN)->second + " with unknown last name";
-			}
-		}
-		else {
-			if (iterFN->first == year && iterLN->first == year) {
-				return iterFN->second + iterLN->second;
-			}
-			else if (iterFN->first != year && iterFN != begin(d_firstName) && iterLN->first == year) {
-				return prev(iterFN)->second + iterLN->second;
-			}
-			else if (iterLN->first != year && iterLN != begin(d_lastName) && iterFN->first == year) {
-				return iterFN->second + prev(iterLN)->second;
-			}
-			else {
-				return prev(iterFN)->second + prev(iterLN)->second;
-			}
-		}
-
-		return " ";
+    if (lb_first_name == begin(d_fName) && lb_last_name == begin(d_lName))
+      return "Incognito";
+    else if (lb_first_name == begin(d_fName) && lb_last_name != begin(d_lName))
+      return prev(lb_last_name)->second + " with unknown first name";
+    else if (lb_first_name != begin(d_fName) && lb_last_name == begin(d_lName))
+      return prev(lb_first_name)->second + " with unknown last name";
+    else
+      return prev(lb_first_name)->second + " " + prev(lb_last_name)->second;
 	}
+
+
+  string GetFullNameWithHistory(int year) {
+    vector<string> fName;
+    vector<string> lName;
+    auto iterUBFn = d_fName.upper_bound(year);
+    for (auto it = d_fName.begin(); it != iterUBFn; ++it) {
+      fName.push_back(it->second);
+    }
+
+    fName.erase(std::unique(begin(fName), end(fName)), end(fName));
+
+    auto iterUBLn = d_lName.upper_bound(year);
+    for (auto it = d_lName.begin(); it != iterUBLn; ++it) {
+      lName.push_back(it->second);
+    }
+
+    lName.erase(std::unique(begin(lName), end(lName)), end(lName));
+
+    stringstream ss;
+    // TODO
+
+    
+
+    return ss.str();
+  }
+
 private:
-	map<int, std::string> d_firstName;
-	map<int, std::string> d_lastName;
+	map<int, std::string> d_fName;
+	map<int, std::string> d_lName;
 };
 
 
 int main() {
-	
-	Person person;
+  Person person;
 
-	person.ChangeFirstName(1965, "Polina");
-	person.ChangeLastName(1967, "Sergeeva");
-	for (int year : {1900, 1965, 1990}) {
-		cout << person.GetFullName(year) << endl;
-	}
+  person.ChangeFirstName(1900, "Eugene");
+  person.ChangeLastName(1900, "Sokolov");
+  person.ChangeLastName(1910, "Sokolov");
+  person.ChangeFirstName(1920, "Evgeny");
+  person.ChangeLastName(1930, "Sokolov");
+  cout << person.GetFullNameWithHistory(1940) << endl;
 
-	person.ChangeFirstName(1970, "Appolinaria");
-	for (int year : {1969, 1970}) {
-		cout << person.GetFullName(year) << endl;
-	}
 
-	person.ChangeLastName(1968, "Volkova");
-	for (int year : {1969, 1970}) {
-		cout << person.GetFullName(year) << endl;
-	}
-
-	return 0;
 	return 0;
 }
