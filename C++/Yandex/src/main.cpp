@@ -1,4 +1,4 @@
-#include"unit_test\unit_test.h"
+﻿#include"unit_test\unit_test.h"
 #include"time_logger\time_logger.h"
 
 #include"0_white_belt\week_2\week_2.h"
@@ -244,34 +244,325 @@ struct LectureTitle {
   explicit LectureTitle(Specialization s, Course c, Week w) : specialization(s), course(c), week(w) {}
 };
 
-int main() {
+
+
+// --> 
+struct Image {
+  double quality;
+  double freshness;
+  double rating;
+};
+
+struct Params {
+  double a;
+  double b;
+  double c;
+};
+
+
+class FunctionPart {
+public:
+  FunctionPart(char operation, double value) : d_operation(operation), d_value(value) {}
+
+  double Apply(double sourceValue) const {
+    if (d_operation == '+') {
+      return sourceValue + d_value;
+    }
+    else if (d_operation == '-'){
+      return sourceValue - d_value;
+    }
+    else if (d_operation == '*') {
+      return sourceValue * d_value;
+    }
+    else {
+      return sourceValue / d_value;
+    }
+  }
+
+  void Invert() {
+    if (d_operation == '+') {
+      d_operation = '-';
+    }
+    else if (d_operation == '-'){
+      d_operation = '+';
+    }
+    else if (d_operation == '*') {
+      d_operation = '/';
+    }
+    else {
+      d_operation = '*';
+    }
+  }
+
+private:
+  char d_operation;
+  double d_value;
+};
+
+class Function {
+public:
+  void AddPart(const char operation, double value) {
+    d_parts.push_back({ operation, value });
+  }
+  double Apply(double value) const {
+    for (const auto& part : d_parts) {
+      value = part.Apply(value);
+    }
+    return value;
+  }
+
+  void Invert() {
+    for (auto & part : d_parts) {
+      part.Invert();
+    }
+
+    reverse(begin(d_parts), end(d_parts));
+  }
+
+private:
+  vector<FunctionPart> d_parts;
+};
+
+Function MakeWeightFunction(const Params& params,
+                            const Image& image) {
+  Function function;
+  function.AddPart('*', params.a);
+  function.AddPart('-', image.freshness * params.b);
+  function.AddPart('+', image.rating * params.c);
+  return function;
+}
+
+double ComputeImageWeight(const Params& params, const Image& image) {
+  Function function = MakeWeightFunction(params, image);
+  return function.Apply(image.quality);
+}
+
+double ComputeQualityByWeight(const Params& params,
+                              const Image& image,
+                              double weight) {
+  Function function = MakeWeightFunction(params, image);
+  function.Invert();
+  return function.Apply(weight);
+}
+
+#include<fstream>
+#include <iomanip> 
+
+
+struct Student {
+  std::string d_fName;
+  std::string d_lName;
+  long int d_day;
+  long int d_month;
+  long int d_year;
+
+  friend istream& operator>>(std::istream &is, Student &st) {
+    is >> st.d_fName >> st.d_lName >> st.d_day >> st.d_month >> st.d_year;
+    return is;
+  }
+
+  void PrintName() const {
+    cout << d_fName << " " << d_lName << endl;
+  }
+
+  void PrintDate() const {
+    cout << d_day << "." << d_month << "." << d_year << endl;
+  }
+
+};
+
+
+class Rational {
+public:
+  Rational() : d_numenator(0), d_denominator(1) {}
+  Rational(int numerator, int denominator) {
+    if (denominator == 0) {
+      throw invalid_argument("Invalid argument");
+    }
+    if (numerator == 0) {
+      d_numenator = 0;
+      d_denominator = 1;
+    }
+    else if (numerator < 0 && denominator < 0) {
+      d_numenator = -numerator;
+      d_denominator = -denominator;
+    }
+    else if (numerator < 0 || denominator < 0) {
+      d_numenator = -abs(numerator);
+      d_denominator = abs(denominator);
+    }
+    else {
+      d_numenator = numerator;
+      d_denominator = denominator;
+    }
+
+    int d = Divisor(abs(d_numenator), abs(d_denominator));
+    d_numenator /= d;
+    d_denominator /= d;
+  }
+
+  int Numerator() const {
+    return d_numenator;
+  }
+  int Denominator() const {
+    return d_denominator;
+  }
+
+
+  friend istream& operator>>(istream & is, Rational& r) {
+    int num{ 0 }, denum{ 0 };
+    is >> num; is.ignore(1); is >> denum;
+
+    if (denum != 0) {
+      Rational tmp{ num, denum };
+      r.d_numenator = tmp.d_numenator;
+      r.d_denominator = tmp.d_denominator;
+    }
+    
+    return is;
+  }
+
+  friend ostream& operator<<(ostream& os, const Rational& r) {
+    os << r.Numerator() << '/' << r.Denominator();
+    return os;
+  }
+
+
+private:
+
+  int Divisor(int numenator, int denumenator) {
+    while (numenator > 0 && denumenator > 0) {
+      if (numenator > denumenator) {
+        numenator %= denumenator;
+      }
+      else {
+        denumenator %= numenator;
+      }
+    }
+    return denumenator + numenator;
+  }
+
+  int d_numenator;
+  int d_denominator;
+
+};
+
+bool operator==(const Rational& left, const Rational& right) {
+  return left.Numerator() == right.Numerator() && left.Denominator() == right.Denominator();
+}
+
+Rational operator+(const Rational& left, const Rational& right) {
+  return {
+    left.Numerator() * right.Denominator() + right.Numerator() * left.Denominator(),
+    left.Denominator() * right.Denominator()
+  };
+}
+
+Rational operator-(const Rational& left, const Rational& right) {
+  return {
+    left.Numerator() * right.Denominator() - right.Numerator() * left.Denominator(),
+    left.Denominator() * right.Denominator()
+  };
+}
+
+Rational operator*(const Rational& left, const Rational& right) {
+  return {
+    left.Numerator() * right.Numerator(),
+    left.Denominator() * right.Denominator()
+  };
+}
+
+Rational operator/(const Rational& left, const Rational& right) {
+  if (right.Numerator() == 0) {
+    throw domain_error("Division by zero");
+  }
+  return {
+    left.Numerator() * right.Denominator(),
+    left.Denominator() * right.Numerator()
+  };
+}
+
+bool operator<(const Rational& left, const Rational& right) {
+  return left.Numerator() * right.Denominator() < right.Numerator() * left.Denominator();
+}
+
+
+void EnsureEqual(const string& left, const string& right) {
+  if (left != right) {
+    stringstream ss;
+    ss << left << " != " << right;
+    throw runtime_error(ss.str());
+  }
+}
+
+void Calculator() {
+  int a{ 0 }, b{ 0 }, c{ 0 }, d{ 0 };
+  char operation{ ' ' };
+  cin >> a; cin.ignore(1);
+  cin >> b; cin.ignore(1);
+  cin >> operation; cin.ignore();
+  cin >> c; cin.ignore(1);
+  cin >> d;
+
+  try {
+    Rational first{ a, b };
+    Rational second{ c, d };
+
+    switch (operation)
+    {
+    case '+':
+      cout << first + second;
+      break;
+    case '-':
+      cout << first - second;
+      break;
+    case '*':
+      cout << first * second;
+      break;
+    case '/':
+      cout << first / second;
+      break;
+    default:
+
+      break;
+    };
+  }
+  catch (exception& e) {
+    cout << e.what();
+  }
   
-  LectureTitle title(
-    Specialization("C++"),
-    Course("White belt"),
-    Week("4th")
-  );
+}
 
+string AskTimeServer() {
+  return "lol";
+}
 
-  LectureTitle title("C++", "White belt", "4th");
+class TimeServer {
+public:
+  string GetCurrentTime() {
+    string result{ "" };
+    try {
+      result = AskTimeServer();
+      LastFetchedTime = result;
+    }
+    catch (system_error& e) {
+      return LastFetchedTime;
+    }
 
-  LectureTitle title(string("C++"), string("White belt"), string("4th"));
+    return result;
+  }
 
-  LectureTitle title = { "C++", "White belt", "4th" };
+private:
+  string LastFetchedTime = "00:00:00";
+};
 
-  LectureTitle title = { {"C++"}, {"White belt"}, {"4th"} };
-
-  LectureTitle title(
-    Course("White belt"),
-    Specialization("C++"),
-    Week("4th")
-  );
-
-  LectureTitle title(
-    Specialization("C++"),
-    Week("4th"),
-    Course("White belt")
-  );
-
+int main() {
+  TimeServer ts;
+  try {
+    cout << ts.GetCurrentTime() << endl;
+  }
+  catch (exception& e) {
+    cout << "Exception got: " << e.what() << endl;
+  }
   return 0;
 }
