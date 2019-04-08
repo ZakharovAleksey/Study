@@ -556,13 +556,273 @@ private:
   string LastFetchedTime = "00:00:00";
 };
 
-int main() {
-  TimeServer ts;
-  try {
-    cout << ts.GetCurrentTime() << endl;
+
+
+
+// Final Task
+
+
+#pragma region Year
+
+struct MyYear {
+  int d_year;
+
+  explicit MyYear() : d_year(0) {}
+  explicit MyYear(int year) : d_year(year) {}
+
+  friend istream& operator>>(istream& is, MyYear& year) {
+    is >> year.d_year;
+    return is;
   }
-  catch (exception& e) {
-    cout << "Exception got: " << e.what() << endl;
+
+  friend ostream& operator<<(ostream& os, const MyYear& year) {
+    os << year.d_year;
+    return os;
+  }
+};
+
+bool operator==(const MyYear& left, const MyYear& right) {
+  return left.d_year == right.d_year;
+}
+
+bool operator<(const MyYear& left, const MyYear& right) {
+  return left.d_year < right.d_year;
+}
+
+#pragma endregion
+
+#pragma region Month
+
+struct MyMonth {
+  int d_month;
+
+  explicit MyMonth() : d_month(0) {}
+  explicit MyMonth(int month) {
+    if (month < 1 || month > 12) {
+      throw invalid_argument("Month value is invalid: " + std::to_string(month));
+    }
+    d_month = month;
+  }
+
+  friend istream& operator>>(istream& is, MyMonth& month) {
+    int inpuMonth{ 0 };
+    is >> inpuMonth;
+
+    MyMonth tmp{ inpuMonth };
+    month.d_month = tmp.d_month;
+    return is;
+  }
+
+  friend ostream& operator<<(ostream& os, const MyMonth& month) {
+    os << month.d_month;
+    return os;
+  }
+};
+
+bool operator==(const MyMonth& left, const MyMonth& right) {
+  return left.d_month == right.d_month;
+}
+
+bool operator<(const MyMonth& left, const MyMonth& right) {
+  return left.d_month < right.d_month;
+}
+
+#pragma endregion
+
+#pragma region Day
+
+struct MyDay {
+  int d_day;
+
+  explicit MyDay() : d_day(0) {}
+  explicit MyDay(int day) {
+    if (day < 1 || day > 31) {
+      throw invalid_argument("Day value is invalid: " + std::to_string(day));
+    }
+    d_day = day;
+  }
+
+  friend istream& operator>>(istream& is, MyDay& day) {
+    int inputDay{ 0 };
+    is >> inputDay;
+
+    MyDay tmp{ inputDay };
+    day.d_day = tmp.d_day;
+    return is;
+  }
+
+  friend ostream& operator<<(ostream& os, const MyDay& day) {
+    os << day.d_day;
+    return os;
+  }
+};
+
+bool operator==(const MyDay& left, const MyDay& right) {
+  return left.d_day == right.d_day;
+}
+
+bool operator<(const MyDay& left, const MyDay& right) {
+  return left.d_day < right.d_day;
+}
+
+#pragma endregion
+
+struct MyDate {
+  MyYear d_year;
+  MyMonth d_month;
+  MyDay d_day;
+
+  MyDate() : d_year(), d_month(), d_day() {}
+  MyDate(MyYear year, MyMonth month, MyDay day) : d_year(year), d_month(month), d_day(day) {}
+
+  friend istream& operator>>(istream& is, MyDate& date) {
+    string userInput{ "" };
+    //is >> userInput;
+    //is.seekg(0, is.beg);
+    
+    is >> date.d_year;
+    date.isCorrectInputSeparator(is, userInput);
+
+    is >> date.d_month;
+    date.isCorrectInputSeparator(is, userInput);
+
+    is >> date.d_day;
+
+    // Check is there is no symbols after correct date
+    if (!std::istream::traits_type::eof()) {
+      throw invalid_argument("Wrong date format: " + userInput);
+    }
+    return is;
+  }
+
+  friend ostream& operator<<(ostream& os, const MyDate& date) {
+    os << date.d_year << '-';
+    os << setfill('0') << setw(2) << date.d_month << '-';
+    os << setfill('0') << setw(2) << date.d_day;
+    return os;
+  }
+
+private:
+
+  void isCorrectInputSeparator(istream& is, const string& userInput) {
+    char sepSymbol = ' ';
+    sepSymbol = is.peek();
+    if (sepSymbol != '-') {
+      throw invalid_argument("Wrong date format : " + userInput);
+    }
+    is.ignore(1);
+  }
+};
+
+bool operator<(const MyDate& left, const MyDate& right) {
+  return make_tuple(left.d_year, left.d_month, left.d_day) < make_tuple(right.d_year, right.d_month, right.d_day);
+}
+
+bool operator==(const MyDate& left, const MyDate& right) {
+  return make_tuple(left.d_year, left.d_month, left.d_day) == make_tuple(right.d_year, right.d_month, right.d_day);
+}
+
+using Event = std::string;
+
+class MyDataBase {
+public:
+  MyDataBase() {}
+
+  void Add(const MyDate& i_date, const Event i_event) {
+    if (!i_event.empty()) {
+      d_body[i_date].insert(i_event);
+    }
+  }
+
+  void Del(const MyDate& i_date, const Event i_event) {
+    if (!i_event.empty()) {
+      auto dateIter = d_body.find(i_date);
+
+      if (dateIter != d_body.end()) {
+        auto eventIter = dateIter->second.find(i_event);
+
+        if (eventIter != dateIter->second.end()) {
+          dateIter->second.erase(eventIter);
+          cout << "Deleted successfully" << endl;
+        }
+        else {
+          cout << "Event not found";
+        }
+      }
+      else {
+        cout << "Event not found";
+      }
+    }
+  }
+
+  void Del(const MyDate& i_date) {
+    auto dateIter = d_body.find(i_date);
+    if (dateIter != d_body.end()) {
+      cout << "Deleted " << dateIter->second.size() << " events" << endl;
+      d_body.erase(dateIter);
+    }
+  }
+
+  void Find(const MyDate& i_date) const {
+    auto dateIter = d_body.find(i_date);
+    if (dateIter != d_body.end()) {
+      copy(begin(dateIter->second), end(dateIter->second), ostream_iterator<Event>(cout, "\n"));
+    }
+  }
+
+  void Print() const {
+    for (const auto& p : d_body) {
+      for (const auto& e : p.second) {
+        cout << p.first << " " << e << "\n";
+      }
+    }
+  }
+
+private:
+  map<MyDate, set<string>> d_body;
+};
+
+
+int main() {
+  MyDataBase db;
+  ifstream in("input.txt");
+
+  string command{ "" };
+  MyDate date;
+  Event inputEvent;
+
+  while (!in.eof()) {
+    try {
+      in >> command;
+      if (command == "Print") {
+        db.Print();
+      }
+      else if (command == "Find") {
+        in >> date;
+        db.Find(date);
+      }
+      else if (command == "Add") {
+        in >> date;
+        in >> inputEvent;
+        db.Add(date, inputEvent);
+      }
+      else if (command == "Del") {
+        in >> date >> inputEvent;
+        if (inputEvent.empty()) {
+          db.Del(date);
+        }
+        else {
+          db.Del(date, inputEvent);
+        }
+      }
+      else {
+        throw runtime_error("Unknown command " + command);
+      }
+    }
+    catch (std::exception& e) {
+      cout << e.what() << endl;
+    }
+    in.get();
   }
   return 0;
 }
