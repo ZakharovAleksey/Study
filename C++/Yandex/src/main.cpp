@@ -561,6 +561,7 @@ private:
 
 // Final Task
 
+#include<regex>
 
 #pragma region Year
 
@@ -569,6 +570,9 @@ struct MyYear {
 
   explicit MyYear() : d_year(0) {}
   explicit MyYear(int year) : d_year(year) {}
+  explicit MyYear(string& year) {
+    auto pattern = "";
+  }
 
   friend istream& operator>>(istream& is, MyYear& year) {
     is >> year.d_year;
@@ -674,19 +678,22 @@ struct MyDate {
 
   MyDate() : d_year(), d_month(), d_day() {}
   MyDate(MyYear year, MyMonth month, MyDay day) : d_year(year), d_month(month), d_day(day) {}
+  MyDate(const string& date) {
+    
+  }
 
   friend istream& operator>>(istream& is, MyDate& date) {
     string userInput{ "" };
-    //is >> userInput;
-    //is.seekg(0, is.beg);
-    
-    is >> date.d_year;
-    date.isCorrectInputSeparator(is, userInput);
+    date.ReadUntillSpaceOrNewLine(is, userInput);
+    stringstream ss(userInput);
 
-    is >> date.d_month;
-    date.isCorrectInputSeparator(is, userInput);
+    ss >> date.d_year;
+    date.isCorrectInputSeparator(ss, userInput);
 
-    is >> date.d_day;
+    ss >> date.d_month;
+    date.isCorrectInputSeparator(ss, userInput);
+
+    ss >> date.d_day;
 
     // Check is there is no symbols after correct date
     if (!std::istream::traits_type::eof()) {
@@ -696,7 +703,7 @@ struct MyDate {
   }
 
   friend ostream& operator<<(ostream& os, const MyDate& date) {
-    os << date.d_year << '-';
+    os << setfill('0') << setw(4) << date.d_year << '-';
     os << setfill('0') << setw(2) << date.d_month << '-';
     os << setfill('0') << setw(2) << date.d_day;
     return os;
@@ -704,7 +711,16 @@ struct MyDate {
 
 private:
 
-  void isCorrectInputSeparator(istream& is, const string& userInput) {
+  void ReadUntillSpaceOrNewLine(istream& is, std::string& userInput) {
+    is.ignore();
+    char cur{ 'a' };
+    while (!is.eof() && is.peek() != '\n' && is.peek() != ' ') {
+      is >> cur;
+      userInput.push_back(cur);
+    }
+  }
+
+  void isCorrectInputSeparator(stringstream& is, const string& userInput) {
     char sepSymbol = ' ';
     sepSymbol = is.peek();
     if (sepSymbol != '-') {
@@ -791,27 +807,32 @@ int main() {
   MyDate date;
   Event inputEvent;
 
-  while (!in.eof()) {
+  string total_command;
+
+  while (getline(cin, total_command)) {
     try {
-      in >> command;
+      stringstream ss(total_command);
+      ss >> command;
       if (command == "Print") {
         db.Print();
       }
       else if (command == "Find") {
-        in >> date;
+        ss >> date;
         db.Find(date);
       }
       else if (command == "Add") {
-        in >> date;
-        in >> inputEvent;
+        ss >> date;
+        ss >> inputEvent;
         db.Add(date, inputEvent);
       }
       else if (command == "Del") {
-        in >> date >> inputEvent;
-        if (inputEvent.empty()) {
+        ss >> date;
+        cout << "LOL = " << ss.peek() << endl;
+        if (ss.peek() == 10) {
           db.Del(date);
         }
         else {
+          ss >> inputEvent;
           db.Del(date, inputEvent);
         }
       }
@@ -821,8 +842,8 @@ int main() {
     }
     catch (std::exception& e) {
       cout << e.what() << endl;
-    }
-    in.get();
+      return 0;
+    }  
   }
   return 0;
 }
