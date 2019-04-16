@@ -557,293 +557,193 @@ private:
 };
 
 
+// Final task
 
+struct MYear {
+	int d_year;
 
-// Final Task
-
-#include<regex>
-
-#pragma region Year
-
-struct MyYear {
-  int d_year;
-
-  explicit MyYear() : d_year(0) {}
-  explicit MyYear(int year) : d_year(year) {}
-  explicit MyYear(string& year) {
-    auto pattern = "";
-  }
-
-  friend istream& operator>>(istream& is, MyYear& year) {
-    is >> year.d_year;
-    return is;
-  }
-
-  friend ostream& operator<<(ostream& os, const MyYear& year) {
-    os << year.d_year;
-    return os;
-  }
+	MYear() : d_year(0) {}
+	MYear(int year) : d_year(year) {}
 };
 
-bool operator==(const MyYear& left, const MyYear& right) {
-  return left.d_year == right.d_year;
+bool operator<(const MYear& left, const MYear& right) {
+	return left.d_year < right.d_year;
 }
 
-bool operator<(const MyYear& left, const MyYear& right) {
-  return left.d_year < right.d_year;
+bool operator==(const MYear& left, const MYear& right) {
+	return left.d_year == right.d_year;
 }
 
-#pragma endregion
+ostream& operator<<(ostream& os, const MYear& year) {
+	os << year.d_year;
+	return os;
+}
 
-#pragma region Month
+struct MMonth {
+	int d_month;
 
-struct MyMonth {
-  int d_month;
-
-  explicit MyMonth() : d_month(0) {}
-  explicit MyMonth(int month) {
-    if (month < 1 || month > 12) {
-      throw invalid_argument("Month value is invalid: " + std::to_string(month));
-    }
-    d_month = month;
-  }
-
-  friend istream& operator>>(istream& is, MyMonth& month) {
-    int inpuMonth{ 0 };
-    is >> inpuMonth;
-
-    MyMonth tmp{ inpuMonth };
-    month.d_month = tmp.d_month;
-    return is;
-  }
-
-  friend ostream& operator<<(ostream& os, const MyMonth& month) {
-    os << month.d_month;
-    return os;
-  }
+	MMonth() : d_month(1) {}
+	MMonth(int month) {
+		if (month < 1 || month > 12) {
+			throw invalid_argument("Month value is invalid: " + std::to_string(month));
+		}
+		d_month = month;
+	}
 };
 
-bool operator==(const MyMonth& left, const MyMonth& right) {
-  return left.d_month == right.d_month;
+bool operator<(const MMonth& left, const MMonth& right) {
+	return left.d_month < right.d_month;
 }
 
-bool operator<(const MyMonth& left, const MyMonth& right) {
-  return left.d_month < right.d_month;
+bool operator==(const MMonth& left, const MMonth& right) {
+	return left.d_month == right.d_month;
 }
 
-#pragma endregion
+ostream& operator<<(ostream& os, const MMonth& month) {
+	os << month.d_month;
+	return os;
+}
 
-#pragma region Day
+struct MDay {
+	int d_day;
 
-struct MyDay {
-  int d_day;
-
-  explicit MyDay() : d_day(0) {}
-  explicit MyDay(int day) {
-    if (day < 1 || day > 31) {
-      throw invalid_argument("Day value is invalid: " + std::to_string(day));
-    }
-    d_day = day;
-  }
-
-  friend istream& operator>>(istream& is, MyDay& day) {
-    int inputDay{ 0 };
-    is >> inputDay;
-
-    MyDay tmp{ inputDay };
-    day.d_day = tmp.d_day;
-    return is;
-  }
-
-  friend ostream& operator<<(ostream& os, const MyDay& day) {
-    os << day.d_day;
-    return os;
-  }
+	MDay() : d_day(1) {}
+	MDay(int day) {
+		if (day < 1 || day > 31) {
+			throw invalid_argument("Month value is invalid: " + std::to_string(day));
+		}
+		d_day = day;
+	}
 };
 
-bool operator==(const MyDay& left, const MyDay& right) {
-  return left.d_day == right.d_day;
+bool operator<(const MDay& left, const MDay& right) {
+	return left.d_day < right.d_day;
 }
 
-bool operator<(const MyDay& left, const MyDay& right) {
-  return left.d_day < right.d_day;
+bool operator==(const MDay& left, const MDay& right) {
+	return left.d_day == right.d_day;
 }
 
-#pragma endregion
+ostream& operator<<(ostream& os, const MDay& day) {
+	os << day.d_day;
+	return os;
+}
 
-struct MyDate {
-  MyYear d_year;
-  MyMonth d_month;
-  MyDay d_day;
+struct MDate {
+	MYear d_year;
+	MMonth d_month;
+	MDay d_day;
 
-  MyDate() : d_year(), d_month(), d_day() {}
-  MyDate(MyYear year, MyMonth month, MyDay day) : d_year(year), d_month(month), d_day(day) {}
-  MyDate(const string& date) {
-    
-  }
+	MDate() {}
+	MDate(int year, int month, int day) : d_year(year), d_month(month), d_day(day) {}
 
-  friend istream& operator>>(istream& is, MyDate& date) {
-    string userInput{ "" };
-    date.ReadUntillSpaceOrNewLine(is, userInput);
-    stringstream ss(userInput);
-
-    ss >> date.d_year;
-    date.isCorrectInputSeparator(ss, userInput);
-
-    ss >> date.d_month;
-    date.isCorrectInputSeparator(ss, userInput);
-
-    ss >> date.d_day;
-
-    // Check is there is no symbols after correct date
-    if (!std::istream::traits_type::eof()) {
-      throw invalid_argument("Wrong date format: " + userInput);
-    }
-    return is;
-  }
-
-  friend ostream& operator<<(ostream& os, const MyDate& date) {
-    os << setfill('0') << setw(4) << date.d_year << '-';
-    os << setfill('0') << setw(2) << date.d_month << '-';
-    os << setfill('0') << setw(2) << date.d_day;
-    return os;
-  }
+	friend istream& operator >> (istream& is, MDate& date);
 
 private:
-
-  void ReadUntillSpaceOrNewLine(istream& is, std::string& userInput) {
-    is.ignore();
-    char cur{ 'a' };
-    while (!is.eof() && is.peek() != '\n' && is.peek() != ' ') {
-      is >> cur;
-      userInput.push_back(cur);
-    }
-  }
-
-  void isCorrectInputSeparator(stringstream& is, const string& userInput) {
-    char sepSymbol = ' ';
-    sepSymbol = is.peek();
-    if (sepSymbol != '-') {
-      throw invalid_argument("Wrong date format : " + userInput);
-    }
-    is.ignore(1);
-  }
+	void readSingleValue(stringstream& ss, int& value, const string& userInput) {
+		ss >> value;
+		if (ss.peek() != '-') {
+			throw invalid_argument("Wrong date format: " + userInput);
+		}
+		ss.ignore();
+	}
 };
 
-bool operator<(const MyDate& left, const MyDate& right) {
-  return make_tuple(left.d_year, left.d_month, left.d_day) < make_tuple(right.d_year, right.d_month, right.d_day);
+
+bool operator<(const MDate& left, const MDate& right) {
+	return make_tuple(left.d_year, left.d_month, left.d_day) < make_tuple(right.d_year, right.d_month, right.d_day);
 }
 
-bool operator==(const MyDate& left, const MyDate& right) {
-  return make_tuple(left.d_year, left.d_month, left.d_day) == make_tuple(right.d_year, right.d_month, right.d_day);
+bool operator==(const MDate& left, const MDate& right) {
+	return make_tuple(left.d_year, left.d_month, left.d_day) == make_tuple(right.d_year, right.d_month, right.d_day);
 }
 
-using Event = std::string;
+istream& operator >> (istream& is, MDate& date) {
+	string userInput;
+	copy(istream_iterator<char>(is), istream_iterator<char>(), back_inserter(userInput));
+	stringstream ss(userInput);
+	
+	int year{ 0 }, month{ 0 }, day{ 0 };
+	date.readSingleValue(ss, year, userInput);
+	date.readSingleValue(ss, month, userInput);
+	ss >> day;
 
-class MyDataBase {
+	if (ss.rdbuf()->in_avail() != 0) {
+		throw invalid_argument("Wrong date format: " + userInput);
+	}
+
+	MDate tmp(year, month, day);
+	std::swap(date, tmp);
+
+	return is;
+}
+
+ostream& operator<<(ostream& os, const MDate& date) {
+	os << date.d_year << '-' << date.d_month << '-' << date.d_day;
+	return os;
+}
+
+class MDataBase {
 public:
-  MyDataBase() {}
+	using Event = std::string;
 
-  void Add(const MyDate& i_date, const Event i_event) {
-    if (!i_event.empty()) {
-      d_body[i_date].insert(i_event);
-    }
-  }
+	void Add(const MDate& i_date, const Event& i_event) {
+		d_body[i_date].insert(i_event);
+	}
 
-  void Del(const MyDate& i_date, const Event i_event) {
-    if (!i_event.empty()) {
-      auto dateIter = d_body.find(i_date);
+	void Print() const {
+		for (const auto& p : d_body) {
+			for (const auto& ev : p.second) {
+				cout << p.first << " " << ev << '\n';
+			}
+		}
+	}
 
-      if (dateIter != d_body.end()) {
-        auto eventIter = dateIter->second.find(i_event);
+	void Del(const MDate& i_date, const Event& i_event) {
+		auto dateIter = d_body.find(i_date);
+		if (dateIter != d_body.end()) {
+			auto eventIter = dateIter->second.find(i_event);
+			if (eventIter != dateIter->second.end()) {
+				dateIter->second.erase(eventIter);
+				std::cout << "Deleted successfully";
+			}
+			else {
+				throw invalid_argument("Event not found");
+			}
+		}
+		else {
+			throw invalid_argument("Event not found");
+		}
+	}
+	
+	void Del(const MDate& i_date) {
+		auto dateIter = d_body.find(i_date);
+		if (dateIter != d_body.end()) {
+			cout << "Deleted " << dateIter->second.size() << " events";
+			d_body.erase(dateIter);
+		}
+		cout << "Deleted 0 events";
+	}
 
-        if (eventIter != dateIter->second.end()) {
-          dateIter->second.erase(eventIter);
-          cout << "Deleted successfully" << endl;
-        }
-        else {
-          cout << "Event not found";
-        }
-      }
-      else {
-        cout << "Event not found";
-      }
-    }
-  }
+	void Find(const MDate& i_date) const {
+		auto dateIter = d_body.find(i_date);
+		if (dateIter != d_body.end()) {
+			copy(
+				dateIter->second.begin(),
+				dateIter->second.end(),
+				ostream_iterator<std::string>(cout, "\n")
+			);
+		}
+		else {
+			cout << "Event not found\n";
+		}
 
-  void Del(const MyDate& i_date) {
-    auto dateIter = d_body.find(i_date);
-    if (dateIter != d_body.end()) {
-      cout << "Deleted " << dateIter->second.size() << " events" << endl;
-      d_body.erase(dateIter);
-    }
-  }
-
-  void Find(const MyDate& i_date) const {
-    auto dateIter = d_body.find(i_date);
-    if (dateIter != d_body.end()) {
-      copy(begin(dateIter->second), end(dateIter->second), ostream_iterator<Event>(cout, "\n"));
-    }
-  }
-
-  void Print() const {
-    for (const auto& p : d_body) {
-      for (const auto& e : p.second) {
-        cout << p.first << " " << e << "\n";
-      }
-    }
-  }
+	}
 
 private:
-  map<MyDate, set<string>> d_body;
+	map<MDate, set<Event>> d_body;
 };
-
 
 int main() {
-  MyDataBase db;
-  ifstream in("input.txt");
-
-  string command{ "" };
-  MyDate date;
-  Event inputEvent;
-
-  string total_command;
-
-  while (getline(cin, total_command)) {
-    try {
-      stringstream ss(total_command);
-      ss >> command;
-      if (command == "Print") {
-        db.Print();
-      }
-      else if (command == "Find") {
-        ss >> date;
-        db.Find(date);
-      }
-      else if (command == "Add") {
-        ss >> date;
-        ss >> inputEvent;
-        db.Add(date, inputEvent);
-      }
-      else if (command == "Del") {
-        ss >> date;
-        cout << "LOL = " << ss.peek() << endl;
-        if (ss.peek() == 10) {
-          db.Del(date);
-        }
-        else {
-          ss >> inputEvent;
-          db.Del(date, inputEvent);
-        }
-      }
-      else {
-        throw runtime_error("Unknown command " + command);
-      }
-    }
-    catch (std::exception& e) {
-      cout << e.what() << endl;
-      return 0;
-    }  
-  }
-  return 0;
+	return 0;
 }
