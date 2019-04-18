@@ -35,5 +35,38 @@ namespace RBWeek5{
 		}
 	}
 
+  // Task 2. Split string without copy
+
+  template <typename String>
+  using Group = vector<String>;
+
+  template <typename String>
+  using Char = typename String::value_type;
+
+  template <typename String>
+  vector<Group<String>> GroupHeavyStrings(vector<String> strings) {
+    map<set<Char<String>>, Group<String>> groupMap;
+    set<Char<String>> curKey;
+
+    for (auto& curString : strings) {
+      std::for_each(begin(curString), end(curString), [&curKey](const Char<String>& symbol) {
+        curKey.insert(symbol);
+      });
+      auto keyIter = groupMap.find(curKey);
+      if (keyIter != groupMap.end()) {
+        keyIter->second.push_back(move(curString));
+      }
+      else {
+        groupMap[move(curKey)].push_back(move(curString));
+      }
+      curKey.clear();
+    }
+    vector<Group<String>> res;	res.reserve(groupMap.size());
+    for (auto& c : groupMap) {
+      res.push_back(move(c.second));
+    }
+    return move(res);
+  }
+
 
 }
