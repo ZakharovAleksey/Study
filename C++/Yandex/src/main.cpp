@@ -745,54 +745,100 @@ private:
 };
 
 
-class CopyTest {
-public:
-  CopyTest(string data) : data_(data), copy_cnt(0) {
-  }
+template <typename Token>
+using Sentence = vector<Token>;
 
-  CopyTest(const CopyTest & other) {
-    data_ = other.data_;
-    copy_cnt = other.copy_cnt + 1;
-  }
+template <typename Token>
+vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
+	if (tokens.empty()) {
+		return{ {} };
+	}
 
-  CopyTest(CopyTest && other) noexcept {
-    data_ = other.data_;
-    copy_cnt = other.copy_cnt;
-  }
+	bool isPrevEnd = tokens[0].IsEndSentencePunctuation();
+	vector<Sentence<Token>>	result; 
+	result.push_back({ move(tokens[0]) });
+	size_t sentenceId{ 0 };
+	
+	for (size_t tokenId = 1; tokenId != tokens.size(); ++tokenId) {
+	//for (auto tokenIter = next(begin(tokens)); tokenIter != end(tokens); ++tokenIter) {
+		bool isCurEnd = tokens[tokenId].IsEndSentencePunctuation();
 
-  CopyTest& operator=(CopyTest&& other) {
-    data_ = other.data_;
-    copy_cnt = other.copy_cnt;
-  }
+		if (isPrevEnd && isCurEnd) {
+			result[sentenceId].push_back(move(tokens[tokenId]));
+		}
+		else if (isPrevEnd && !isCurEnd) {
+			result.push_back({ move(tokens[tokenId]) });
+			++sentenceId;
+		}
+		else if (!isPrevEnd && isCurEnd) {
+			result[sentenceId].push_back(move(tokens[tokenId]));
+		}
+		else {
+			result[sentenceId].push_back(move(tokens[tokenId]));
+		}
 
-  auto begin() {
-    return data_.begin();
-  }
+		isPrevEnd = isCurEnd;
+	}
 
-  auto end() {
-    return data_.end();
-  }
+	return result;
+}
 
-  string data_;
-  int copy_cnt;
-  using value_type = typename char;
+
+struct TestToken {
+	TestToken(const string& l) : data(l) {}
+	TestToken(const string& l, bool a) : data(l), is_end_sentence_punctuation(a) {}
+	TestToken(const TestToken & l) : data(l.data), is_end_sentence_punctuation(l.is_end_sentence_punctuation) {}
+	TestToken(TestToken && l) : data(l.data), is_end_sentence_punctuation(l.is_end_sentence_punctuation) { 
+		l.data.clear(); 
+		l.is_end_sentence_punctuation = false;
+	}
+
+	string data;
+	bool is_end_sentence_punctuation = false;
+
+	bool IsEndSentencePunctuation() const {
+		return is_end_sentence_punctuation;
+	}
+	bool operator==(const TestToken& other) const {
+		return data == other.data && is_end_sentence_punctuation == other.is_end_sentence_punctuation;
+	}
 };
 
-bool operator==(const CopyTest & lhs, const CopyTest & rhs) {
-  if (lhs.copy_cnt == rhs.copy_cnt) {
-    return true;
-  }
-  return false;
+ostream& operator<<(ostream& stream, const TestToken& token) {
+	return stream << token.data;
 }
 
-bool operator<(const CopyTest & lhs, const CopyTest & rhs) {
-  if (lhs.copy_cnt < rhs.copy_cnt) {
-    return true;
-  }
-}
+void TestSplitting() {
+	ASSERT_EQUAL(
+		SplitIntoSentences(vector<TestToken>(
+	{ TestToken("Split"),TestToken("into"),TestToken("sentences"),TestToken("!") })),
+		vector<Sentence<TestToken>>({
+			{ { "Split" },{ "into" },{ "sentences" },{ "!" } }
+	})
+	);
 
+	ASSERT_EQUAL(
+		SplitIntoSentences(vector<TestToken>(
+	{ TestToken("Split"),TestToken("into"),TestToken("sentences"),TestToken("!", true) })),
+		vector<Sentence<TestToken>>({
+			{ TestToken("Split"),TestToken("into"),TestToken("sentences"),TestToken("!", true) }
+	})
+	);
+
+	ASSERT_EQUAL(
+		SplitIntoSentences(
+			vector<TestToken>(
+	{ TestToken("Split"),TestToken("into"),TestToken("sentences"),TestToken("!", true),TestToken("!", true),
+				TestToken("Without"),TestToken("copies"),TestToken(".", true) })),
+		vector<Sentence<TestToken>>({
+			{ TestToken("Split"),TestToken("into"),TestToken("sentences"),TestToken("!", true),TestToken("!", true) },
+			{ TestToken("Without"),TestToken("copies"),TestToken(".", true) },
+	})
+	);
+}
 
 int main() {
-
+	TestRunner tr;
+	RUN_TEST(tr, TestSplitting);
 	return 0;
 }
