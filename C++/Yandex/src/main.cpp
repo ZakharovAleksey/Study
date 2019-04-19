@@ -748,49 +748,84 @@ private:
 template <typename Token>
 using Sentence = vector<Token>;
 
+//template <typename Token>
+//vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
+//  cout << "FUNC START" << endl;
+//	vector<Sentence<Token>>	result;
+//  if (tokens.empty()) {
+//    return result;
+//  }
+//  bool isPrevEnd = tokens[0].IsEndSentencePunctuation();
+//
+//	result.push_back({});
+//	size_t sentenceId{ 0 };
+//  result[sentenceId].reserve(1'000'000);
+//  result[sentenceId].push_back(move(tokens[0]));
+//
+//	for (
+//    auto tokenIter = make_move_iterator(next(begin(tokens)));
+//    tokenIter != make_move_iterator(end(tokens)); ++tokenIter
+//    ) {
+//		bool isCurEnd = tokenIter->IsEndSentencePunctuation();
+//
+//		if (isPrevEnd && isCurEnd) {
+//			result[sentenceId].push_back(*tokenIter);
+//		}
+//		else if (isPrevEnd && !isCurEnd) {
+//			result.push_back({});
+//      result[++sentenceId].reserve(1'000'000);
+//			result[sentenceId].push_back(*tokenIter);
+//		}
+//		else if (!isPrevEnd && isCurEnd) {
+//			result[sentenceId].push_back(*tokenIter);
+//		}
+//		else {
+//			result[sentenceId].push_back(*tokenIter);
+//		}
+//
+//		isPrevEnd = isCurEnd;
+//	}
+//  cout << "FUNC END" << endl;
+//	return result;
+//}
+
 template <typename Token>
 vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
   cout << "FUNC START" << endl;
-	vector<Sentence<Token>>	result;
+  vector<Sentence<Token>>	result;
   if (tokens.empty()) {
     return result;
   }
   bool isPrevEnd = tokens[0].IsEndSentencePunctuation();
 
-	result.push_back({});
-	size_t sentenceId{ 0 };
-  result[sentenceId].reserve(1'000'000);
-  result[sentenceId].push_back(move(tokens[0]));
+  Sentence<Token> sentence;
+  sentence.reserve(1'000'000);
+  sentence.push_back(move(tokens[0]));
 
-	for (
-    auto tokenIter = make_move_iterator(next(begin(tokens)));
-    tokenIter != make_move_iterator(end(tokens)); ++tokenIter
-    ) {
-		bool isCurEnd = tokenIter->IsEndSentencePunctuation();
+  for ( auto tokenIter = make_move_iterator(next(begin(tokens))); tokenIter != make_move_iterator(end(tokens)); ++tokenIter) {
+    bool isCurEnd = tokenIter->IsEndSentencePunctuation();
 
-		if (isPrevEnd && isCurEnd) {
-			result[sentenceId].push_back(*tokenIter);
-		}
-		else if (isPrevEnd && !isCurEnd) {
-			result.push_back({});
-      result[++sentenceId].reserve(1'000'000);
-			result[sentenceId].push_back(*tokenIter);
-		}
-		else if (!isPrevEnd && isCurEnd) {
-			result[sentenceId].push_back(*tokenIter);
-		}
-		else {
-			result[sentenceId].push_back(*tokenIter);
-		}
+    if (isPrevEnd && !isCurEnd) {
+      result.push_back(move(sentence));
+      sentence.reserve(1'000'000);
+      sentence.push_back(*tokenIter);
+    }
+    else {
+      sentence.push_back(*tokenIter);
+    }
+    isPrevEnd = isCurEnd;
+  }
 
-		isPrevEnd = isCurEnd;
-	}
+  if (!sentence.empty()) {
+    result.push_back(move(sentence));
+  }
+
   cout << "FUNC END" << endl;
-	return result;
+  return result;
 }
 
-
 struct TestToken {
+  TestToken() : data(""), is_end_sentence_punctuation(false) {}
 	TestToken(const string& l) : data(l) {}
 	TestToken(const string& l, bool a) : data(l), is_end_sentence_punctuation(a) {}
 	TestToken(const TestToken & l) : data(l.data), is_end_sentence_punctuation(l.is_end_sentence_punctuation) {
