@@ -4,6 +4,7 @@
 #include <numeric>
 #include<deque>
 #include<string>
+#include "..\..\0_white_belt\week_4\week_4.h"
 
 void PrintVectorPart(const vector<int>& numbers)
 {

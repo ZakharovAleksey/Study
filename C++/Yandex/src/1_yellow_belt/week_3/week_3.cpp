@@ -21,6 +21,7 @@ void Sort(vector<int>& nums)
 
 #include <stdexcept>
 #include <regex>
+#include "..\..\0_white_belt\week_3\week_3.h"
 
 PhoneNumber::PhoneNumber(const string & international_number)
 {

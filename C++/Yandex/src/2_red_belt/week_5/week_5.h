@@ -8,6 +8,8 @@
 
 namespace RBWeek5{
 
+	using namespace std;
+
 	// Task 1. Josephus permutation without copy
 	template<typename RandomIt>
 	void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) {
@@ -68,5 +70,51 @@ namespace RBWeek5{
     return move(res);
   }
 
+  // Task 3. Split text into sentences without copy
+  // Hint: Main idea here to get to TIME LIMIT: allocate memory for vector & move 
+  // element by element, not whole vector at once and call clear after move. Than
+  // capacity will not change and there will be no reallocations.
+
+  template <typename Token>
+  using Sentence = vector<Token>;
+
+  template <typename Token>
+  vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
+	  vector<Sentence<Token>>	result;
+	  if (tokens.empty()) {
+		  return result;
+	  }
+	  bool isPrevEnd = tokens[0].IsEndSentencePunctuation();
+
+	  Sentence<Token> sentence;
+	  sentence.reserve(1'000'000);
+	  sentence.push_back(move(tokens[0]));
+
+	  for (auto tokenIter = make_move_iterator(next(begin(tokens))); tokenIter != make_move_iterator(end(tokens)); ++tokenIter) {
+		  bool isCurEnd = tokenIter->IsEndSentencePunctuation();
+
+		  if (isPrevEnd && !isCurEnd) {
+			  // Create new sentence and move all elements from current sentence
+			  result.push_back({});
+			  result.back().reserve(sentence.size());
+
+			  for (auto& word : sentence) {
+				  result.back().push_back(move(word));
+			  }
+
+			  sentence.clear();
+			  sentence.push_back(*tokenIter);
+		  }
+		  else {
+			  sentence.push_back(*tokenIter);
+		  }
+		  isPrevEnd = isCurEnd;
+	  }
+
+	  if (!sentence.empty()) {
+		  result.push_back(move(sentence));
+	  }
+	  return result;
+  }
 
 }

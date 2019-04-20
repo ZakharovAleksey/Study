@@ -1,4 +1,5 @@
 #include "week_5.h"
+#include "..\..\0_white_belt\week_5\week_5.h"
 
 Animal::Animal(const string & name) : Name(name) {}
 
