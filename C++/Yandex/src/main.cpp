@@ -7,9 +7,13 @@ using namespace std;
 using namespace unit_test;
 using namespace log_time;
 
+#include <cstdint>
+#include<memory>
+
+
 int main() {
-  {
-    LOG_DURATION("test");
-    TestRunner tr;
-  }
+	TestRunner tr;
+  // Разобраться с move до конца !!!
+  
+  return 0;
 }

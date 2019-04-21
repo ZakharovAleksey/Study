@@ -6,7 +6,7 @@
 #include<algorithm>
 #include<iterator>
 
-namespace RBWeek5{
+namespace RedBeltW5 {
 
 	using namespace std;
 
@@ -116,5 +116,76 @@ namespace RBWeek5{
 	  }
 	  return result;
   }
+
+  // Task 4. Simple vector with move push_back
+
+  template <typename T>
+  class MoveSimpleVector {
+  public:
+	  MoveSimpleVector() : body_(nullptr), capacity_(0u), size_(0u) {}
+	  explicit MoveSimpleVector(size_t size) : body_(new T[size]), capacity_(size), size_(size) {}
+
+	  ~MoveSimpleVector() {
+		  delete[] body_;
+	  }
+
+	  T& operator[](size_t index) {
+		  return body_[index];
+	  }
+
+	  T* begin() {
+		  return body_;
+	  }
+
+	  T* const begin() const {
+		  return body_;
+	  }
+
+	  T* end() {
+		  return body_ + size_;
+	  }
+
+	  T* const end() const {
+		  return body_ + size_;
+	  }
+
+	  size_t Size() const {
+		  return size_;
+	  }
+	  size_t Capacity() const {
+		  return capacity_;
+	  }
+
+	  void PushBack(T value) {
+		  if (capacity_ == 0) {
+			  capacity_ = size_ = 1;
+			  body_ = new T[size_];
+			  *body_ = std::move(value);
+
+			  return;
+		  }
+
+
+		  if (size_ == capacity_)
+		  {
+			  T* tmp = new T[2u * capacity_];
+			  move(begin(), end(), tmp);
+			  delete[] body_;
+
+			  body_ = tmp;
+			  capacity_ *= 2u;
+		  }
+
+
+		  body_[size_++] = std::move(value);
+	  }
+
+  private:
+	  T* body_;
+	  size_t capacity_;
+	  size_t size_;
+  };
+
+
 
 }
