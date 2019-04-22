@@ -186,6 +186,41 @@ namespace RedBeltW5 {
 	  size_t size_;
   };
 
+  // Task 5. 3-way merge sort via move semantics
 
+  template <typename RandomIt>
+  void MergeSort(RandomIt range_begin, RandomIt range_end) {
+	  size_t length = std::distance(range_begin, range_end);
+	  if (length < 2) {
+		  return;
+	  }
+
+	  vector<typename RandomIt::value_type> res{
+		  make_move_iterator(range_begin),
+		  make_move_iterator(range_end)
+	  };
+
+	  auto iterEndFirst{ res.begin() + length / 3 };
+	  auto iterEndSecond{ res.begin() + 2 * length / 3 };
+
+	  MergeSort(res.begin(), iterEndFirst);
+	  MergeSort(iterEndFirst, iterEndSecond);
+	  MergeSort(iterEndSecond, res.end());
+
+	  vector<typename RandomIt::value_type> tmp;
+	  tmp.reserve(std::distance(res.begin(), iterEndFirst));
+
+	  merge(
+		  make_move_iterator(res.begin()), make_move_iterator(iterEndFirst),
+		  make_move_iterator(iterEndFirst), make_move_iterator(iterEndSecond),
+		  back_inserter(tmp)
+	  );
+
+	  merge(
+		  make_move_iterator(tmp.begin()), make_move_iterator(tmp.end()),
+		  make_move_iterator(iterEndSecond), make_move_iterator(res.end()),
+		  range_begin
+	  );
+  }
 
 }
