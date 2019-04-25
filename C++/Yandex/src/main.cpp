@@ -11,129 +11,87 @@ using namespace log_time;
 #include<memory>
 #include<array>
 
-//template <typename T>
-//class PriorityCollection {
-//public:
-//	using Priority = size_t;
-//	using Id = size_t;
-//  using Pos = size_t;
-//
-//	static const size_t N = 1'000u;
-//	
-//  PriorityCollection() : d_curId(0u), d_maxPriority(0u), d_argMaxId(0) {}
-//
-//	Id Add(T object) {
-//    d_priorityHeap[0].push_back(move(object));
-//		d_IdIdentifier[d_curId] = make_pair(0, d_priorityHeap[0].size() - 1);
-//
-//    return d_curId++;
-//	}
-//
-//  void FillInputIds(const size_t lastId, const size_t length) {
-//    for(size_t id = 0; id < length; ++i) {
-//      d_IdIdentifier[d_curId++] = make_pair(0, lastId + id);
-//    }
-//  }
-//
-//	template <typename ObjInputIt, typename IdOutputIt>
-//	void Add(ObjInputIt range_begin, ObjInputIt range_end, IdOutputIt ids_begin) {
-//    const size_t length = std::distance(range_begin, range_end);
-//    const size_t lastId = d_priorityHeap[0].size();
-//
-//    d_priorityHeap[0]{
-//      make_move_iterator(range_begin),
-//      make_move_iterator(range_end),
-//      back_inserter(d_priorityHeap[0])
-//    };
-//		
-//    //move(range_begin, range_end, back_inserter(d_priorityHeap[0]);
-//
-//    FillInputIds(lastId, length);
-//	}
-//
-//	// Возможно вот тут переделать как-то а то дефолтный конструктор так себе
-//  bool IsValid(Id id) const {
-//    return (d_priorityHeap[d_IdIdentifier[id].first][d_IdIdentifier[id].second] == T()) ? true : false;
-//  }
-//
-//	// Получить объект по идентификатору
-//  const T& Get(Id id) const {
-//    return move(d_priorityHeap[d_IdIdentifier[id]][d_IdIdentifier[id].second]);
-//  }
-//
-//	// Увеличить приоритет объекта на 1
-//  void Promote(Id id) {
-//    Priority newPriority = d_IdIdentifier[id].first + 1;
-//    d_priorityHeap[newPriority].push_back(move(d_priorityHeap[d_IdIdentifier[id].first][d_IdIdentifier[id].second]));
-//    d_IdIdentifier[id] = make_pair(newPriority, d_priorityHeap[newPriority].size() - 1);
-//    d_maxPriority = std::max(d_maxPriority, newPriority);
-//    d_argMaxId = std::max(d_argMaxId, id);
-//  }
-//
-//	// Получить объект с максимальным приоритетом и его приоритет
-//  pair<const T&, int> GetMax() const {
-//    return { d_priorityHeap[d_maxPriority][d_IdIdentifier[d_argMaxId].second], d_maxPriority };
-//  }
-//
-//	// Аналогично GetMax, но удаляет элемент из контейнера
-//  pair<T, int> PopMax() {
-//    return { move(d_priorityHeap[d_maxPriority][d_IdIdentifier[d_argMaxId].second]), d_maxPriority };
-//  }
-//
-//private:
-//  Id d_curId;
-//  Priority d_maxPriority;
-//  Id d_argMaxId;
-//
-//	map<Priority, vector<T>> d_priorityHeap;
-//	array< pair<Priority, Pos>, N> d_IdIdentifier;
-//};
-
 template <typename T>
 class PriorityCollection {
 public:
-  using Priority = size_t;
-  using Id = /* Ñ‚Ð¸Ð¿, Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐ¼Ñ‹Ð¹ Ð´Ð»Ñ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ð¾Ð² */;
+  using Priority = int;
+  using Id = size_t;
+  using PriorIdPair = pair<Priority, Id>;
 
-  static const size_t N = 1'000'000;
+  static const size_t N = 1'000;
 
-  PriorityCollection() : d_curId(0), d_isValid(N, false) {
-    d_body.reserve(N);
+  PriorityCollection() : d_curId(0) {
+    d_objects.reserve(N);
+    std::fill(d_isObjValid.begin(), d_isObjValid.end(), false);
+    std::fill(d_objPriority.begin(), d_objPriority.end(), 0);
   }
 
   Id Add(T object) {
-    d_body.push_back(move(object));
+    d_objects.push_back(move(object));
+    d_isObjValid[d_curId] = true;
+    d_heap.insert({0, d_curId});
+    // Default priority is 0 (no assigment is needed)
     return d_curId++;
   }
 
   template <typename ObjInputIt, typename IdOutputIt>
   void Add(ObjInputIt range_begin, ObjInputIt range_end, IdOutputIt ids_begin) {
-    for (auto iter = range_begin; iter != range_end; ++it) {
+    for (auto iter = make_move_iterator(range_begin); iter != make_move_iterator(range_end); ++iter) {
       *(ids_begin++) = Add(*iter);
     }
   }
 
   bool IsValid(Id id) const {
-    return d_isValid[id];
+    return d_isObjValid[id];
   }
 
   const T& Get(Id id) const {
-    return d_body[id];
+    return move(d_objects[id]);
   }
 
   void Promote(Id id) {
-    
+    PriorIdPair pair = make_pair(d_objPriority[id], id);
+
+    auto iter = d_heap.find(pair);
+    if (iter != d_heap.end()) {
+      PriorIdPair newPair = { (iter->first) + 1, iter->second };
+      d_heap.erase(pair);
+      d_heap.insert(newPair);
+      d_objPriority[id] = newPair.first;
+    }
   }
 
-  pair<const T&, int> GetMax() const;
+  pair<const T&, int> GetMax() const {
+    return { d_objects[d_heap.begin()->second], d_heap.begin()->first };
+  }
 
-  pair<T, int> PopMax();
+  pair<T, int> PopMax() {
+    d_isObjValid[d_heap.begin()->second] = false;
+
+    pair<T, int> res{ move(d_objects[d_heap.begin()->second]), d_heap.begin()->first };
+    d_heap.erase(d_heap.begin());
+    return res;
+  }
+
+  struct SetComparator {
+    bool operator()(const PriorIdPair& left, const PriorIdPair& right) const {
+      if (left.first > right.first) {
+        return true;
+      }
+      else if (left.first == right.first) {
+        return left.second > right.second;
+      }
+      return false;
+    }
+
+  };
 
 private:
   size_t d_curId;
-  vector<bool> d_isValid;
-  vector<T> d_body;
-  set<pair<Priority, Id>> d_heap;
+  vector<T> d_objects;
+  array<bool, N> d_isObjValid;
+  array<Priority, N> d_objPriority;
+  set<PriorIdPair, SetComparator> d_heap;
 };
 
 
@@ -174,8 +132,47 @@ void TestNoCopy() {
   }
 }
 
+using Priority = int;
+using Id = size_t;
+
+using PriorityIdPair = std::pair<Priority, Id>;
+
+struct MyPairComparator {
+  bool operator()(const PriorityIdPair& left, const PriorityIdPair& right) {
+    if (left.first > right.first) {
+      return true;
+    }
+    else if (left.first == right.first) {
+      return left.second < right.second;
+    }
+    return false;
+  }
+};
+
+ostream& operator<<(ostream& os, const PriorityIdPair& p) {
+  os << "(" << p.first << ", " << p.second << ") ";
+  return os;
+}
+
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestNoCopy);
+
+  /*set<PriorityIdPair, MyPairComparator> s;
+  s.insert({ 1, 0 });
+  s.insert({ 2, 3 });
+  s.insert({ 1, 3 });
+  s.insert({ 1, 1 });
+  
+
+  auto lol = *s.begin();
+  s.erase(s.begin());
+  cout << "TOP: " << lol.first << " " << lol.second << endl;
+  
+  for (const auto& i : s) {
+    cout << "(" << i.first << ", " << i.second << ") ";
+  }
+  cout << endl;*/
+  
   return 0;
 }
