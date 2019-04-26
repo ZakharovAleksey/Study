@@ -36,8 +36,9 @@ public:
 
   template <typename ObjInputIt, typename IdOutputIt>
   void Add(ObjInputIt range_begin, ObjInputIt range_end, IdOutputIt ids_begin) {
-    for (auto iter = make_move_iterator(range_begin); iter != make_move_iterator(range_end); ++iter) {
-      *(ids_begin++) = Add(*iter);
+    for (auto iter = range_begin; iter != range_end; ++iter) {
+      auto curId{ 0 };// = Add(move(*iter));
+      *(ids_begin++) = curId;
     }
   }
 
@@ -132,6 +133,42 @@ void TestNoCopy() {
   }
 }
 
+void TestNoCopyRange() {
+  size_t len{ 3 };
+  PriorityCollection<StringNonCopyable> strings;
+
+  vector<StringNonCopyable> input;
+  input.push_back({ "white" });
+  input.push_back({ "yellow" });
+  input.push_back({ "red" });
+  
+  vector<int> ids; 
+  ids.reserve(len);
+
+  strings.Add(input.begin(), input.end(), ids.begin());
+
+  strings.Promote(ids[1]);
+  for (int i = 0; i < 2; ++i) {
+    strings.Promote(ids[2]);
+  }
+  strings.Promote(ids[1]);
+  {
+    const auto item = strings.PopMax();
+    ASSERT_EQUAL(item.first, "red");
+    ASSERT_EQUAL(item.second, 2);
+  }
+  {
+    const auto item = strings.PopMax();
+    ASSERT_EQUAL(item.first, "yellow");
+    ASSERT_EQUAL(item.second, 2);
+  }
+  {
+    const auto item = strings.PopMax();
+    ASSERT_EQUAL(item.first, "white");
+    ASSERT_EQUAL(item.second, 0);
+  }
+}
+
 using Priority = int;
 using Id = size_t;
 
@@ -157,6 +194,7 @@ ostream& operator<<(ostream& os, const PriorityIdPair& p) {
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestNoCopy);
+  RUN_TEST(tr, TestNoCopyRange);
 
   /*set<PriorityIdPair, MyPairComparator> s;
   s.insert({ 1, 0 });
