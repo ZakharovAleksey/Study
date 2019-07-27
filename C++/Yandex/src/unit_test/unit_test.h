@@ -13,6 +13,7 @@
 #include<vector>
 #include<algorithm>
 #include<iterator>
+#include<map>
 
 namespace unit_test
 {
@@ -27,6 +28,28 @@ namespace unit_test
 		//copy(begin(v), end(v), std::ostream_iterator<T>(os, " "));
 		return os;
 	}
+
+  template<class Key, class Value>
+  ostream& operator<<(ostream& os, const std::map<Key, Value>& m){
+    for(const auto&[key, value] : m){
+      os << key << " : " << value << '\n';
+    }
+    return os;
+  }
+
+  template<class Key, class Value>
+  bool operator==(const std::map<Key, Value>& left, const std::map<Key, Value>& right) {
+    for (const auto[key, value] : left) {
+      if (auto it = right.find(key); it != right.end()) {
+        return value == it->second;
+      }
+      else
+        return false;
+    }
+    return true;
+  }
+
+
 
 	template<class T, class U>
 	void AssertEqual(const T & left, const U & right, const string hint)

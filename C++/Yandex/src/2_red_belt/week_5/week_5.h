@@ -5,6 +5,10 @@
 #include<set>
 #include<algorithm>
 #include<iterator>
+#include<future>
+#include<numeric>
+
+#include"../week_1/week_1.h"
 
 namespace RedBeltW5 {
 
@@ -223,4 +227,33 @@ namespace RedBeltW5 {
 	  );
   }
 
+  // Task 6. Sum of matrix via async
+
+  template<typename ContainerOfVectors>
+  int64_t CalculateSumSingleThread(ContainerOfVectors& result) {
+    int64_t subSum{ 0 };
+    for (auto& row : result) {
+      subSum += std::accumulate(row.begin(), row.end(), 0);
+    }
+
+    return subSum;
+  }
+
+  int64_t CalculateMatrixSum(const vector<vector<int>>& matrix) {
+    int64_t sum{ 0 };
+
+    std::vector<std::future<int64_t>> futures;
+    size_t pageSize{ 2250 };
+    
+    for (auto page : week_1::Paginate(matrix, pageSize)) {
+      futures.push_back(
+        std::async([page] { return CalculateSumSingleThread(page); })
+      );
+    }
+    for (auto& f : futures) {
+      sum += f.get();
+    }
+
+    return sum;
+  }
 }

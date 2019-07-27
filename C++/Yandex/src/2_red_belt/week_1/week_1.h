@@ -218,7 +218,7 @@ namespace week_1
 		return MakeRange(begin(body), next(begin(body), min(size, body.size())));
 	}
 
-#pragma region Шаблон Paginator
+#pragma region Paginator
 
 	template<class It>
 	class Paginator
