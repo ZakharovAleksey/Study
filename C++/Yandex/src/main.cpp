@@ -23,8 +23,8 @@ using namespace log_time;
 
 // Read about uniform distribution check
 
-int main() {
+#include"3_brown_belt\2_NamespacesAndThisPtr\xml.h"
 
+int main() {
   TestRunner tr;
-  return 0;
 }
