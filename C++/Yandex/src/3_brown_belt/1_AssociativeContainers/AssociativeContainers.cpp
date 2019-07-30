@@ -87,6 +87,42 @@ namespace BrownBeltWeek1 {
     return a * PrimVal * PrimVal * PrimVal + b * PrimVal * PrimVal + c * PrimVal + d;
   }
 
+  bool Database::Put(const Record& record) {
+    if (auto idIter = d_body.find(record.id); idIter == d_body.end()) {
+      auto iterBoolPair = d_body.insert({ record.id, record });
+
+      auto timeIter = d_timestepMap.insert({ record.timestamp, iterBoolPair.first });
+      auto karmaIter = d_karmaMap.insert({ record.karma, iterBoolPair.first });
+      auto userIter = d_userMap.insert({ record.user, iterBoolPair.first });
+
+      d_iterMap.insert({ record.id, {timeIter, karmaIter, userIter} });
+      return true;
+    }
+    return false;
+  }
+
+  const Record* Database::GetById(const std::string& id) const {
+    if (auto idIter = d_body.find(id); idIter != d_body.end()) {
+      return &idIter->second;
+    }
+    return nullptr;
+  }
+
+  bool Database::Erase(const std::string& id) {
+    if (auto idIter = d_body.find(id); idIter != d_body.end()) {
+      const auto iters = d_iterMap.at(id);
+
+      d_timestepMap.erase(std::get<0>(iters));
+      d_karmaMap.erase(std::get<1>(iters));
+      d_userMap.erase(std::get<2>(iters));
+
+      d_body.erase(id);
+      return true;
+    }
+    return false;
+  }
+
+
 }
 
   
