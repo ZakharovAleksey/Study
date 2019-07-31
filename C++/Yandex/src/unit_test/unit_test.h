@@ -14,6 +14,7 @@
 #include<algorithm>
 #include<iterator>
 #include<map>
+#include<unordered_map>
 
 namespace unit_test
 {
@@ -28,6 +29,14 @@ namespace unit_test
 		//copy(begin(v), end(v), std::ostream_iterator<T>(os, " "));
 		return os;
 	}
+
+  template<class Key, class Value>
+  ostream & operator<<(ostream & os, const std::unordered_map<Key, Value> & i_map)
+  {
+    for(const auto[key, value] : i_map)
+      os << key << " : " << value << std::endl;
+    return os;
+  }
 
   template<class Key, class Value>
   ostream& operator<<(ostream& os, const std::map<Key, Value>& m){
@@ -49,7 +58,17 @@ namespace unit_test
     return true;
   }
 
-
+  template<class Key, class Value>
+  bool operator==(const std::unordered_map<Key, Value>& left, const std::unordered_map<Key, Value>& right) {
+    for (const auto&[key, value] : left) {
+      if (auto it = right.find(key); it != right.end()) {
+        return value == it->second;
+      }
+      else
+        return false;
+    }
+    return true;
+  }
 
 	template<class T, class U>
 	void AssertEqual(const T & left, const U & right, const string hint)
