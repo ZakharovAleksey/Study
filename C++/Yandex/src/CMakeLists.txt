@@ -53,6 +53,8 @@ set(
 	"3_brown_belt/2_NamespacesAndThisPtr/xml.cpp"
 	"3_brown_belt/2_NamespacesAndThisPtr/json.h"
 	"3_brown_belt/2_NamespacesAndThisPtr/json.cpp"
+	"3_brown_belt/2_NamespacesAndThisPtr/ini.h"
+	"3_brown_belt/2_NamespacesAndThisPtr/ini.cpp"
 	"3_brown_belt/3_ConstQualifierAndUniquePtr/ConstQualifierAndUniquePtr.h"
 	"3_brown_belt/3_ConstQualifierAndUniquePtr/ConstQualifierAndUniquePtr.cpp"
 	"3_brown_belt/4_SharedPtrAndRAII/SharedPtrAndRAII.h"

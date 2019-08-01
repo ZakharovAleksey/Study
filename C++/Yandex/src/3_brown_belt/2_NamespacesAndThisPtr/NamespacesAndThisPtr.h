@@ -12,7 +12,7 @@ namespace BrownBeltWeek2{
     int amount;
   };
 
-  std::vector<Spending> LoadFromXml(istream& input) {
+  std::vector<Spending> LoadFromXml(std::istream& input) {
     std::vector<Spending> result;
     Xml::Document doc = Xml::Load(input);
     const Xml::Node& root = doc.GetRoot();
@@ -28,19 +28,19 @@ namespace BrownBeltWeek2{
 
 #pragma region Loading data from JSON
 
-  std::vector<Spending> LoadFromJson(istream& input) {
-    std::vector<Spending> result;
-    Json::Document doc = Json::Load(input);
-    for (const auto& element : doc.GetRoot().AsArray()) {
-      const map<string, Json::Node>& node = element.AsMap();
-      result.push_back(
-        { node.at("category").AsString(), node.at("amount").AsInt() }
-      );
-    }
-    return result;
-  }
+  std::vector<Spending> LoadFromJson(std::istream& input);
 
 #pragma endregion
+
+
+#pragma region Code refactoring
+
+  Json::Document XmlToJson(const Xml::Document& doc);
+
+  Xml::Document JsonToXml(const Json::Document& doc, std::string root_name);
+
+#pragma endregion
+
 
 
 }

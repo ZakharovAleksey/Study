@@ -5,14 +5,16 @@
 using namespace std;
 
 namespace Xml {
+
   pair<string_view, string_view> Split(string_view line, char by) {
     size_t pos = line.find(by);
     string_view left = line.substr(0, pos);
 
     if (pos < line.size() && pos + 1 < line.size()) {
-      return {left, line.substr(pos + 1)};
-    } else {
-      return {left, string_view()};
+      return { left, line.substr(pos + 1) };
+    }
+    else {
+      return { left, string_view() };
     }
   }
 
@@ -38,13 +40,13 @@ namespace Xml {
     getline(input, root_name);
 
     Node root(root_name.substr(1, root_name.size() - 2), {});
-    for (string line; getline(input, line) && Lstrip(line)[1] != '/'; ) {
-      auto [node_name, attrs] = Split(Lstrip(line), ' ');
+    for (string line; getline(input, line) && line[1] != '/'; ) {
+      auto[node_name, attrs] = Split(Lstrip(line), ' ');
       attrs = Split(attrs, '>').first;
       unordered_map<string, string> node_attrs;
       while (!attrs.empty()) {
-        auto [head, tail] = Split(attrs, ' ');
-        auto [name, value] = Split(head, '=');
+        auto[head, tail] = Split(attrs, ' ');
+        auto[name, value] = Split(head, '=');
         if (!name.empty() && !value.empty()) {
           node_attrs[string(Unquote(name))] = string(Unquote(value));
         }
@@ -57,7 +59,7 @@ namespace Xml {
   }
 
   Document Load(istream& input) {
-    return Document{LoadNode(input)};
+    return Document{ LoadNode(input) };
   }
 
   Node::Node(
@@ -83,4 +85,5 @@ namespace Xml {
   string_view Node::Name() const {
     return name;
   }
+
 }
