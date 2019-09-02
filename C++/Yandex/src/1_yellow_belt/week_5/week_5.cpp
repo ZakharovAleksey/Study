@@ -84,7 +84,7 @@ shared_ptr<Figure> CreateFigure(istringstream & is)
 		int a, b, c; is >> a >> b >> c;
 		return make_shared<Triangle>(a, b, c);
 	}
-	else if (figure_type == "CIRCLE")
+	else 
 	{
 		int r; is >> r;
 		return make_shared<Circle>(r);

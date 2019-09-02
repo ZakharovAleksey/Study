@@ -101,7 +101,7 @@ void FindSecondF() {
 			index = -1;
 		}
 		else if (str[i] == 'f' && cur_rep_numb == 1) {
-			index = i;
+			index = static_cast<int>(i);
 			break;
 		}
 	}

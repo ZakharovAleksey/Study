@@ -1,29 +1,29 @@
-﻿#include"unit_test\unit_test.h"
-#include"time_logger\time_logger.h"
+﻿#include "time_logger\time_logger.h"
+#include "unit_test\unit_test.h"
 
-//using namespace std;
+// using namespace std;
 using namespace unit_test;
 using namespace log_time;
 
-#include <cstdint>
-#include<memory>
-#include<array>
-
-
-#include<forward_list>
-#include<vector>
-#include<unordered_map>
-#include<deque>
+#include <array>
 #include <cassert>
+#include <cstdint>
+#include <deque>
 
-
+#include <forward_list>
 #include <limits>
+#include <memory>
+
 #include <random>
-#include<unordered_set>
+#include <unordered_map>
+#include <unordered_set>
+
+#include <vector>
 
 // Read about uniform distribution check
 
-int main() {
+int main()
+{
   TestRunner tr;
   return 0;
 }

@@ -1,0 +1,29 @@
+AccessModifierOffset: 0
+AlignEscapedNewlines: Right
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: true
+BinPackParameters: true
+IndentWidth: 2
+SpacesInAngles: false
+AlignAfterOpenBracket: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: true
+  AfterNamespace: true
+  AfterEnum: true
+  AfterStruct: true
+  AfterFunction: true
+  BeforeCatch: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+Cpp11BracedListStyle: false
+IndentCaseLabels: true
+IndentWrappedFunctionNames: true
+PointerAlignment: Left
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeRangeBasedForLoopColon: true
