@@ -4,6 +4,7 @@ AllowShortLoopsOnASingleLine: false
 BinPackArguments: true
 BinPackParameters: true
 IndentWidth: 2
+BasedOnStyle: LLVM
 SpacesInAngles: false
 AlignAfterOpenBracket: true
 BreakBeforeBraces: Custom
@@ -27,3 +28,7 @@ SpaceAfterCStyleCast: true
 SpaceAfterTemplateKeyword: false
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeRangeBasedForLoopColon: true
+AlwaysBreakTemplateDeclarations: Yes
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
