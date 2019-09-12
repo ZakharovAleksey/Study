@@ -5,10 +5,10 @@ using namespace std;
 using namespace unit_test;
 using namespace log_time;
 
-using namespace std;
-
 #include <algorithm>
 #include <numeric>
+#include <set>
+#include <unordered_map>
 
 template<typename Iterator>
 class IteratorRange {
@@ -40,22 +40,93 @@ struct Person
   string name;
   int age, income;
   bool is_male;
+
+  friend std::istream& operator>>(std::istream& is, Person& p);
 };
 
-vector<Person> ReadPeople(istream& input)
+std::istream& operator>>(std::istream& is, Person& p)
 {
-  int count;
-  input >> count;
+  char gender;
+  is >> p.name >> p.age >> p.income >> gender;
+  p.is_male = (gender == 'M');
+  return is;
+}
 
-  vector<Person> result(count);
-  for (Person& p : result)
+struct CmpPersonByAge
+{
+  bool operator()(const Person& left, const Person& right)
   {
-    char gender;
-    input >> p.name >> p.age >> p.income >> gender;
-    p.is_male = gender == 'M';
+    return left.age < right.age;
+  }
+};
+
+struct CmpPersonByIncome
+{
+  bool operator()(const Person& left, const Person& right)
+  {
+    return left.income > right.income;
+  }
+};
+
+std::string findPopularName(
+    const std::unordered_map<std::string, size_t>& i_con)
+{
+  if (i_con.empty())
+    return "";
+  auto cmpCount = [](const auto& left, const auto& right) -> bool {
+    return left.second < right.second;
+  };
+
+  const size_t maxCount =
+      std::max_element(std::begin(i_con), std::end(i_con), cmpCount)->second;
+
+  std::set<std::string> peopleMaxCount;
+  for (const auto& [name, count] : i_con)
+  {
+    if (count == maxCount)
+      peopleMaxCount.insert(name);
   }
 
-  return result;
+  return *std::begin(peopleMaxCount);
+}
+
+using SetByAge = std::multiset<Person, CmpPersonByAge>;
+using SetByIncome = std::multiset<Person, CmpPersonByIncome>;
+
+using MySetPair = std::pair<SetByAge, SetByIncome>;
+
+const MySetPair ReadPeople(std::istream& i_input, std::string& io_popMaleName,
+                           std::string& io_popFemaleName)
+{
+  size_t count;
+  i_input >> count;
+  Person p;
+
+  // ToDo: change set of peoples to multiset of ages / incomes
+  SetByAge personAge;
+  SetByIncome personIncome;
+
+  std::unordered_map<std::string, size_t> maleNames;
+  maleNames.reserve(count);
+  std::unordered_map<std::string, size_t> femaleNames;
+  femaleNames.reserve(count);
+
+  for (size_t i = 0; i < count; ++i)
+  {
+    i_input >> p;
+    personAge.insert(p);
+    personIncome.insert(p);
+
+    if (p.is_male)
+      ++maleNames[p.name];
+    else
+      ++femaleNames[p.name];
+  }
+
+  io_popMaleName = findPopularName(maleNames);
+  io_popFemaleName = findPopularName(femaleNames);
+
+  return { personAge, personIncome };
 }
 
 #include <fstream>
@@ -65,11 +136,10 @@ int main()
   ifstream in_info("input_info.txt");
   ifstream in_com("input_comands.txt");
 
-  vector<Person> people = ReadPeople(in_info);
+  std::string popMaleName, popFemaleName;
 
-  sort(begin(people), end(people), [](const Person& lhs, const Person& rhs) {
-    return lhs.age < rhs.age;
-  });
+  const auto [peopleAge, peopleIncom] =
+      ReadPeople(in_info, popMaleName, popFemaleName);
 
   for (string command; in_com >> command;)
   {
@@ -78,76 +148,37 @@ int main()
       int adult_age;
       in_com >> adult_age;
 
-      auto adult_begin = lower_bound(begin(people), end(people), adult_age,
-                                     [](const Person& lhs, int age) {
-                                       return lhs.age > age;
+      auto adult_begin = lower_bound(std::begin(peopleAge), std::end(peopleAge),
+                                     adult_age, [](const Person& lhs, int age) {
+                                       return lhs.age < age;
                                      });
 
-      cout << "There are " << std::distance(adult_begin, end(people))
+      cout << "There are " << std::distance(adult_begin, end(peopleAge))
            << " adult people for maturity age " << adult_age << '\n';
     } else if (command == "WEALTHY")
     {
       int count;
       in_com >> count;
 
-      auto head = Head(people, count);
+      auto head = Head(peopleIncom, count);
 
-      std::partial_sort(head.begin(), head.end(), end(people),
-                        [](const Person& lhs, const Person& rhs) {
-                          return lhs.income > rhs.income;
-                        });
-
-      int total_income =
-          std::accumulate(head.begin(), head.end(), 0, [](int cur, Person& p) {
-            return p.income += cur;
-          });
-      cout << "Top-" << count << " people have total income " << total_income
+      int totalIncome = std::accumulate(head.begin(), head.end(), 0,
+                                        [](int cur, const Person& p) {
+                                          return cur += p.income;
+                                        });
+      cout << "Top-" << count << " people have total income " << totalIncome
            << '\n';
     } else if (command == "POPULAR_NAME")
     {
       char gender;
       in_com >> gender;
 
-      IteratorRange range{ begin(people),
-                           partition(begin(people), end(people),
-                                     [gender](Person& p) {
-                                       return p.is_male = (gender == 'M');
-                                     }) };
-      if (range.begin() == range.end())
-      {
-        cout << "No people of gender " << gender << '\n';
-      } else
-      {
-        sort(range.begin(), range.end(),
-             [](const Person& lhs, const Person& rhs) {
-               return lhs.name < rhs.name;
-             });
-        const string* most_popular_name = &range.begin()->name;
-        int count = 1;
-        for (auto i = range.begin(); i != range.end();)
-        {
-          auto same_name_end =
-              find_if_not(i, range.end(), [i](const Person& p) {
-                return p.name == i->name;
-              });
-          auto cur_name_count = std::distance(i, same_name_end);
-          if (cur_name_count > count)
-          {
-            count = cur_name_count;
-            most_popular_name = &i->name;
-          }
-          i = same_name_end;
-        }
+      if ((gender == 'M' && popMaleName.empty()) ||
+          (gender == 'W' && popFemaleName.empty()))
+        std::cout << "No people of gender " << gender << '\n';
+      else
         cout << "Most popular name among people of gender " << gender << " is "
-             << *most_popular_name << '\n';
-      }
+             << ((gender == 'M') ? popMaleName : popFemaleName) << '\n';
     }
   }
 }
-
-//
-// int main()
-//{
-//  TestRunner tr;
-//  return 0;
-//}
