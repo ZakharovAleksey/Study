@@ -1,5 +1,5 @@
-﻿#include "time_logger\time_logger.h"
-#include "unit_test\unit_test.h"
+﻿#include <time_logger.h>
+#include <unit_test.h>
 
 using namespace std;
 using namespace unit_test;
@@ -7,6 +7,7 @@ using namespace log_time;
 
 using namespace std;
 
+#include <algorithm>
 #include <numeric>
 
 template<typename Iterator>
@@ -91,10 +92,10 @@ int main()
 
       auto head = Head(people, count);
 
-      partial_sort(head.begin(), head.end(), end(people),
-                   [](const Person& lhs, const Person& rhs) {
-                     return lhs.income > rhs.income;
-                   });
+      std::partial_sort(head.begin(), head.end(), end(people),
+                        [](const Person& lhs, const Person& rhs) {
+                          return lhs.income > rhs.income;
+                        });
 
       int total_income =
           std::accumulate(head.begin(), head.end(), 0, [](int cur, Person& p) {

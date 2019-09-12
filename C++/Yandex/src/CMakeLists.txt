@@ -1,77 +1,38 @@
+# Author: Zakharov Aleksey
 cmake_minimum_required(VERSION 3.5)
 
-set(
-	source_list
-	"0_white_belt/week_1/week_1.h"
-	"0_white_belt/week_1/week_1.cpp"
-	"0_white_belt/week_2/week_2.h"
-	"0_white_belt/week_2/week_2.cpp"
-	"0_white_belt/week_3/week_3.h"
-	"0_white_belt/week_3/week_3.cpp"
-	"0_white_belt/week_4/week_4.h"
-	"0_white_belt/week_4/week_4.cpp"
-	"0_white_belt/week_5/week_5.h"
-	"0_white_belt/week_5/week_5.cpp"
-	"1_yellow_belt/week_1/week_1.h"
-	"1_yellow_belt/week_1/week_1.cpp"
-	"1_yellow_belt/week_2/week_2.h"
-	"1_yellow_belt/week_2/week_2.cpp"
-	"1_yellow_belt/week_3/week_3.h"
-	"1_yellow_belt/week_3/week_3.cpp"
-	"1_yellow_belt/week_4/week_4.h"
-	"1_yellow_belt/week_4/week_4.cpp"
-	"1_yellow_belt/week_5/week_5.h"
-	"1_yellow_belt/week_5/week_5.cpp"
-	"1_yellow_belt/week_6/condition_parser.h"
-	"1_yellow_belt/week_6/condition_parser.cpp"
-	"1_yellow_belt/week_6/condition_parser_test.cpp"
-	"1_yellow_belt/week_6/database.h"
-	"1_yellow_belt/week_6/database.cpp"
-	"1_yellow_belt/week_6/database_test.cpp"
-	"1_yellow_belt/week_6/date.h"
-	"1_yellow_belt/week_6/date.cpp"
-	"1_yellow_belt/week_6/node.h"
-	"1_yellow_belt/week_6/node.cpp"
-	"1_yellow_belt/week_6/test_runner.h"
-	"1_yellow_belt/week_6/token.h"
-	"1_yellow_belt/week_6/token.cpp"
-	"2_red_belt/week_1/week_1.h"
-	"2_red_belt/week_1/week_1.cpp"
-	"2_red_belt/week_2/week_2.h"
-	"2_red_belt/week_2/week_2.cpp"
-	"2_red_belt/week_3/week_3.h"
-	"2_red_belt/week_3/week_3.cpp"
-	"2_red_belt/week_4/week_4.h"
-	"2_red_belt/week_4/week_4.cpp"
-	"2_red_belt/week_5/week_5.h"
-	"2_red_belt/week_5/week_5.cpp"
-	"3_brown_belt/1_AssociativeContainers/AssociativeContainers.h"
-	"3_brown_belt/1_AssociativeContainers/AssociativeContainers.cpp"
-	"3_brown_belt/2_NamespacesAndThisPtr/NamespacesAndThisPtr.h"
-	"3_brown_belt/2_NamespacesAndThisPtr/NamespacesAndThisPtr.cpp"
-	"3_brown_belt/2_NamespacesAndThisPtr/xml.h"
-	"3_brown_belt/2_NamespacesAndThisPtr/xml.cpp"
-	"3_brown_belt/2_NamespacesAndThisPtr/json.h"
-	"3_brown_belt/2_NamespacesAndThisPtr/json.cpp"
-	"3_brown_belt/2_NamespacesAndThisPtr/ini.h"
-	"3_brown_belt/2_NamespacesAndThisPtr/ini.cpp"
-	"3_brown_belt/3_ConstQualifierAndUniquePtr/ConstQualifierAndUniquePtr.h"
-	"3_brown_belt/3_ConstQualifierAndUniquePtr/ConstQualifierAndUniquePtr.cpp"
-	"3_brown_belt/4_SharedPtrAndRAII/SharedPtrAndRAII.h"
-	"3_brown_belt/4_SharedPtrAndRAII/SharedPtrAndRAII.cpp"
-	"3_brown_belt/5_ClearCodePrinciples/ClearCodePrinciples.h"
-	"3_brown_belt/5_ClearCodePrinciples/ClearCodePrinciples.cpp"
-	"unit_test/unit_test.h"
-	"unit_test/unit_test.cpp"
-	"time_logger/time_logger.h"
-	"time_logger/time_logger.cpp"
+# Add all *.cpp & *.h files to project
+file(GLOB_RECURSE source_list 
+	LIST_DIRECTORIES false
+	"0_white_belt/*.cpp"
+	"0_white_belt/*.h"
+	"1_yellow_belt/*.cpp"
+	"1_yellow_belt/*.h"
+	"2_red_belt/*.cpp"
+	"2_red_belt/*.h"
+	"3_brown_belt/*.cpp"
+	"3_brown_belt/*.h"	
 	"main.cpp"
 )
 
+# Create an executable projecrt
 add_executable(${PROJECT_NAME} ${source_list})
 
-foreach(source IN LISTS source_list)
-    get_filename_component(source_path "${source}" PATH)
-    string(REPLACE "/" "\\" source_path_msvc "${source_path}")
-    source_group("${source_path_msvc}" FILES "${source}")
+# Add libraries we want to use
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	logging
+	unit_testing
+)
+
+# This allows to usage of #include<external_library>
+target_include_directories(${PROJECT_NAME} PUBLIC
+	../time_logger
+	../unit_test
+)
+
+foreach(_source IN ITEMS ${source_list})
+    get_filename_component(_source_path "${_source}" PATH)
+    file(RELATIVE_PATH _source_path_rel "${_src_root_path}" "${_source_path}")
+    string(REPLACE "/" "\\" _group_path "${_source_path_rel}")
+    source_group("${_group_path}" FILES "${_source}")
 endforeach()

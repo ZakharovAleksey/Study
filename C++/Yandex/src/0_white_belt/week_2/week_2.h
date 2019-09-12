@@ -1,78 +1,79 @@
 #pragma once
 
-#include<iostream>
-#include<vector>
-#include<map>
-#include<set>
-#include<cstring>
-#include<string>
-#include<algorithm>
-#include<iterator>
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
-namespace WhiteBeltWeek2 {
+namespace WhiteBeltWeek2
+{
   using namespace std;
 
 #pragma region functions
 
   int Factorial(int n);
-  bool IsPalindrom(const std::string & str);
+  bool IsPalindrom(const std::string& str);
 
   using StringVector = std::vector<std::string>;
-  StringVector PalindromFilter(const StringVector & words, int minLength);
+  StringVector PalindromFilter(const StringVector& words, int minLength);
   void UpdateIfGreater(int first, int& second);
   void MoveString(StringVector& source, StringVector& destination);
 
 #pragma endregion
 
 #pragma region container vector
-  
+
   void Reverse(vector<int>& v);
   void AvgTemperature();
   void GetQueue();
   vector<int> Reversed(const vector<int>& v);
 
   class ToDoList {
-  public:
+    public:
     ToDoList();
 
-    void Add(const size_t d_dayId, const string & i_toDoItem);
+    void Add(const size_t d_dayId, const string& i_toDoItem);
     void goToNextMonth();
     void Dump(const size_t i_dayId) const;
 
-  private:
+    private:
     std::vector<std::vector<std::string>> d_body;
     std::vector<size_t>::const_iterator d_curMonthIter;
 
-    const std::vector<size_t> d_daysPerMonth =
-    {
-      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    };
+    const std::vector<size_t> d_daysPerMonth = { 31, 28, 31, 30, 31, 30,
+                                                 31, 31, 30, 31, 30, 31 };
   };
 
 #pragma endregion
 
 #pragma region container map
 
-// Checks if the word is anagram
-  bool IsAnagram(const std::string & first, const std::string& second);
+  // Checks if the word is anagram
+  bool IsAnagram(const std::string& first, const std::string& second);
 
   // <Country - Capital> dictionary
   class CountryDictionary {
-  public:
+    public:
     CountryDictionary() = default;
 
-    void changeCapital(const std::string& country, const std::string& new_capital);
-    void renameCountry(const std::string& old_country, const std::string& new_country);
+    void changeCapital(const std::string& country,
+                       const std::string& new_capital);
+    void renameCountry(const std::string& old_country,
+                       const std::string& new_country);
     void aboutCountry(const std::string& country) const;
     void dumpCountry() const;
 
-  private:
+    private:
     std::map<std::string, std::string> d_CountryCapital;
   };
 
   // Bus stops task
   class BusStops {
-  public:
+    public:
     using MyVector = std::vector<std::string>;
     using MyMap = std::map<std::string, MyVector>;
 
@@ -81,19 +82,19 @@ namespace WhiteBeltWeek2 {
     void stopsForBus(const std::string& i_bus) const;
     void allBuses() const;
 
-  private:
+    private:
     MyMap d_route;
     MyMap d_stops;
   };
 
-  // Bus route number of 
+  // Bus route number of
   class BusRouteNumber {
-  public:
+    public:
     BusRouteNumber();
 
     void addRoute(const std::vector<std::string>& route);
-    
-  private:
+
+    private:
     size_t d_curIndex;
     std::map<std::vector<std::string>, int> d_body;
   };
@@ -103,29 +104,29 @@ namespace WhiteBeltWeek2 {
 #pragma region container set
 
   class Synonim {
-  public:
+    public:
     Synonim() = default;
     void add(const string& first, const string& second);
 
     int getSynonimsCount(const string& word) const;
     bool areSynonims(const string& first, const string& second) const;
 
-  private:
-    std::map< std::string, std::set<string>> d_body;
+    private:
+    std::map<std::string, std::set<string>> d_body;
   };
 
   set<string> BuildMapValuesSet(const map<int, string>& m);
 
   class BusRouteNumber2 {
-  public:
+    public:
     BusRouteNumber2();
 
     void AddRoute(const std::set<std::string>& route);
 
-  private:
+    private:
     size_t d_curIndex;
     std::map<std::set<std::string>, int> d_body;
   };
 
 #pragma endregion
-}
+}  // namespace WhiteBeltWeek2

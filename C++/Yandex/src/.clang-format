@@ -1,10 +1,11 @@
+# https://google.github.io/styleguide/cppguide.html#Formatting
+BasedOnStyle: Google
 AccessModifierOffset: 0
 AlignEscapedNewlines: Right
 AllowShortLoopsOnASingleLine: false
 BinPackArguments: true
 BinPackParameters: true
 IndentWidth: 2
-BasedOnStyle: LLVM
 SpacesInAngles: false
 AlignAfterOpenBracket: true
 BreakBeforeBraces: Custom
@@ -32,3 +33,4 @@ AlwaysBreakTemplateDeclarations: Yes
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortLambdasOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
+NamespaceIndentation: All
