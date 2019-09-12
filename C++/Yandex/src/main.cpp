@@ -52,22 +52,6 @@ std::istream& operator>>(std::istream& is, Person& p)
   return is;
 }
 
-struct CmpPersonByAge
-{
-  bool operator()(const Person& left, const Person& right)
-  {
-    return left.age < right.age;
-  }
-};
-
-struct CmpPersonByIncome
-{
-  bool operator()(const Person& left, const Person& right)
-  {
-    return left.income > right.income;
-  }
-};
-
 std::string findPopularName(
     const std::unordered_map<std::string, size_t>& i_con)
 {
@@ -90,8 +74,16 @@ std::string findPopularName(
   return *std::begin(peopleMaxCount);
 }
 
-using SetByAge = std::multiset<Person, CmpPersonByAge>;
-using SetByIncome = std::multiset<Person, CmpPersonByIncome>;
+struct cmpByIncome
+{
+  bool operator()(const int& left, const int& right)
+  {
+    return left > right;
+  }
+};
+
+using SetByAge = std::multiset<int>;
+using SetByIncome = std::multiset<int, cmpByIncome>;
 
 using MySetPair = std::pair<SetByAge, SetByIncome>;
 
@@ -114,8 +106,8 @@ const MySetPair ReadPeople(std::istream& i_input, std::string& io_popMaleName,
   for (size_t i = 0; i < count; ++i)
   {
     i_input >> p;
-    personAge.insert(p);
-    personIncome.insert(p);
+    personAge.insert(p.age);
+    personIncome.insert(p.income);
 
     if (p.is_male)
       ++maleNames[p.name];
@@ -149,8 +141,8 @@ int main()
       in_com >> adult_age;
 
       auto adult_begin = lower_bound(std::begin(peopleAge), std::end(peopleAge),
-                                     adult_age, [](const Person& lhs, int age) {
-                                       return lhs.age < age;
+                                     adult_age, [](const int& lhs, int age) {
+                                       return lhs < age;
                                      });
 
       cout << "There are " << std::distance(adult_begin, end(peopleAge))
@@ -163,8 +155,8 @@ int main()
       auto head = Head(peopleIncom, count);
 
       int totalIncome = std::accumulate(head.begin(), head.end(), 0,
-                                        [](int cur, const Person& p) {
-                                          return cur += p.income;
+                                        [](int cur, const int income) {
+                                          return cur += income;
                                         });
       cout << "Top-" << count << " people have total income " << totalIncome
            << '\n';
