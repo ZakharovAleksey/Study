@@ -85,7 +85,7 @@ struct cmpByIncome
 using SetByAge = std::multiset<int>;
 using SetByIncome = std::multiset<int, cmpByIncome>;
 
-using MySetPair = std::pair<SetByAge, SetByIncome>;
+using MySetPair = std::pair<SetByAge, std::vector<int>>;
 
 const MySetPair ReadPeople(std::istream& i_input, std::string& io_popMaleName,
                            std::string& io_popFemaleName)
@@ -115,10 +115,19 @@ const MySetPair ReadPeople(std::istream& i_input, std::string& io_popMaleName,
       ++femaleNames[p.name];
   }
 
+  std::vector<int> totalIncome(personIncome.size());
+  auto incomeIter = std::begin(personIncome);
+  totalIncome[0] = *incomeIter;
+  incomeIter = std::next(incomeIter);
+
+  for (size_t id = 1; id < personIncome.size();
+       ++id, incomeIter = std::next(incomeIter))
+    totalIncome[id] = totalIncome[id - 1] + *incomeIter;
+
   io_popMaleName = findPopularName(maleNames);
   io_popFemaleName = findPopularName(femaleNames);
 
-  return { personAge, personIncome };
+  return { personAge, totalIncome };
 }
 
 #include <fstream>
@@ -130,7 +139,7 @@ int main()
 
   std::string popMaleName, popFemaleName;
 
-  const auto [peopleAge, peopleIncom] =
+  const auto& [peopleAge, peopleIncom] =
       ReadPeople(in_info, popMaleName, popFemaleName);
 
   for (string command; in_com >> command;)
@@ -140,10 +149,7 @@ int main()
       int adult_age;
       in_com >> adult_age;
 
-      auto adult_begin = lower_bound(std::begin(peopleAge), std::end(peopleAge),
-                                     adult_age, [](const int& lhs, int age) {
-                                       return lhs < age;
-                                     });
+      auto adult_begin = peopleAge.lower_bound(adult_age);
 
       cout << "There are " << std::distance(adult_begin, end(peopleAge))
            << " adult people for maturity age " << adult_age << '\n';
@@ -151,13 +157,8 @@ int main()
     {
       int count;
       in_com >> count;
+      int totalIncome = (count == 0) ? 0 : peopleIncom[count - 1];
 
-      auto head = Head(peopleIncom, count);
-
-      int totalIncome = std::accumulate(head.begin(), head.end(), 0,
-                                        [](int cur, const int income) {
-                                          return cur += income;
-                                        });
       cout << "Top-" << count << " people have total income " << totalIncome
            << '\n';
     } else if (command == "POPULAR_NAME")
