@@ -4,6 +4,8 @@
 #include <iterator>
 #include <sstream>
 
+#include "..\..\2_red_belt\week_5\week_5.h"
+
 namespace WhiteBeltW5
 {
   bool WhiteBeltW5::operator<(const MYear& left, const MYear& right)
