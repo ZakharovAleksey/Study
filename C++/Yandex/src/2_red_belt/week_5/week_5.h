@@ -269,7 +269,7 @@ namespace RedBeltW5_NS
     return subSum;
   }
 
-  int64_t CalculateMatrixSum(const vector<vector<int>>& matrix)
+  /*int64_t CalculateMatrixSum(const vector<vector<int>>& matrix)
   {
     int64_t sum{ 0 };
 
@@ -288,7 +288,7 @@ namespace RedBeltW5_NS
     }
 
     return sum;
-  }
+  }*/
 
 #pragma region PQ
 
@@ -415,11 +415,11 @@ namespace RedBeltW5_NS
     }
   };
 
-  ostream& operator<<(ostream& os, const PriorityIdPair& p)
+  /*ostream& operator<<(ostream& os, const PriorityIdPair& p)
   {
     os << "(" << p.first << ", " << p.second << ") ";
     return os;
-  }
+  }*/
 
 #pragma endregion
 
@@ -433,13 +433,37 @@ namespace RedBeltW5_NS
     void operator+=(const Stats& i_other);
   };
 
-  // Think here about std::string_view
   Stats ExploreLine(const set<string>& key_words, const std::string& line);
 
   Stats ExploreKeyWordsSingleThread(const set<string>& key_words,
                                     istream& input);
 
   Stats ExploreKeyWords(const set<string>& key_words, istream& input);
+
+  // Task 6. Synchronized template:
+  // Main idea : create for Access class lock_guard<> behavior by adding it as a
+  // member of this structure.
+
+  template<typename T>
+  class Synchronized {
+    public:
+    explicit Synchronized(T i_initial = T()) : d_value(std::move(i_initial)) {}
+
+    struct Access
+    {
+      T& ref_to_value;
+      std::lock_guard<std::mutex> guard;
+    };
+
+    Access GetAccess()
+    {
+      return { d_value, std::lock_guard(d_mutex) };
+    }
+
+    private:
+    T d_value;
+    std::mutex d_mutex;
+  };
 
 #pragma endregion
 
