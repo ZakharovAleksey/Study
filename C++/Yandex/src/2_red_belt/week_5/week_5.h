@@ -465,6 +465,50 @@ namespace RedBeltW5_NS
     std::mutex d_mutex;
   };
 
+  // Task 7. Concurrent map:
+
+  template<typename K, typename V>
+  class ConcurrentMap {
+    // Pair of map & corresponding mutex
+    struct ThreadSafeMap
+    {
+      std::map<K, V> d_map;
+      std::mutex d_mutex;
+    };
+
+    public:
+    static_assert(is_integral_v<K>, "ConcurrentMap supports only integer keys");
+
+    struct Access
+    {
+      std::lock_guard<std::mutex> d_guard;
+      V& ref_to_value;
+    };
+
+    explicit ConcurrentMap(size_t i_bucketCount) : d_body(i_bucketCount) {}
+
+    Access operator[](const K& i_key)
+    {
+      auto& subMap = d_body[i_key % d_body.size()];
+      return { std::lock_guard(subMap.d_mutex), subMap.d_map[i_key] };
+    }
+
+    std::map<K, V> BuildOrdinaryMap()
+    {
+      std::map<K, V> result;
+      for (auto& subMap : d_body)
+        for (auto& [key, value] : subMap.d_map)
+        {
+          std::lock_guard<std::mutex> guard(subMap.d_mutex);
+          result[key] = value;
+        }
+      return result;
+    }
+
+    private:
+    std::vector<ThreadSafeMap> d_body;
+  };
+
 #pragma endregion
 
 }  // namespace RedBeltW5_NS
