@@ -23,7 +23,7 @@ namespace week_1
 {
 using namespace std;
 
-#pragma region Макрос UPDATE_FIELD  и Макрос SORT_BY
+#pragma region Macros UPDATE_FIELD  and Macros SORT_BY
 
 struct Date
 {

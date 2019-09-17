@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <numeric>
 #include <tuple>
+#include <fstream>
+
+using namespace std;
 
 namespace week_1
 {
@@ -25,6 +28,7 @@ bool operator<(const Date& left, const Date& right)
 
 ostream& operator<<(ostream& os, const Date& d)
 {
+  os << d.year;
   os << d.year << "-" << d.month << "-" << d.day << endl;
   return os;
 }

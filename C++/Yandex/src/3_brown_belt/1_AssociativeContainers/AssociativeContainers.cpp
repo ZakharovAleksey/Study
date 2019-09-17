@@ -25,7 +25,7 @@ namespace BrownBeltWeek1 {
 
     if (isLeaf(node)) {
       Node* parentNode = node->parent;
-      if (node == parentNode->left)
+      if (node == node->parent->left)
         return parentNode;
 
       if (Node* grParentNode = parentNode->parent; grParentNode)
@@ -48,6 +48,8 @@ namespace BrownBeltWeek1 {
 
     if (curNode->right)
       return Successor(curNode->right);
+
+    return nullptr;
   }
 
   bool Point3D::operator==(const Point3D& i_other) const {

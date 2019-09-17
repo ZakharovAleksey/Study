@@ -15,7 +15,7 @@ namespace Ini {
   }
 
   stringPair Split(const std::string& i_line, char i_char) {
-    const int splitId = i_line.find('=');
+    const size_t splitId = i_line.find('=');
     return { i_line.substr(0, splitId), i_line.substr(splitId + 1, i_line.size()) };
   }
 

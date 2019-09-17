@@ -35,7 +35,7 @@ namespace week_2
 					++uniq_count;
 				}
 
-			return uniq_count;
+			return static_cast<int>(uniq_count);
 		}
 
 		vector<string> KnownWords() {

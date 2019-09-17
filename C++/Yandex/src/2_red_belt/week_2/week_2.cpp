@@ -61,7 +61,7 @@ uint32_t HM::Clients(const string& hotel_name) const
     return 0u;
   }
 
-  return it->second.size();
+  return static_cast<uint32_t>(it->second.size());
 }
 
 uint32_t HM::Rooms(const string& hotel_name) const
