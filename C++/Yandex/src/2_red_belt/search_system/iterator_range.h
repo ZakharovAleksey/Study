@@ -1,39 +1,40 @@
 #pragma once
 
 #include <algorithm>
-using namespace std;
 
 namespace Server_NS
 {
   template<typename It>
   class IteratorRange {
     public:
-    IteratorRange(It first, It last) : first(first), last(last) {}
+    IteratorRange(It first, It last) : d_first(first), d_last(last) {}
 
     It begin() const
     {
-      return first;
+      return d_first;
     }
 
     It end() const
     {
-      return last;
+      return d_last;
     }
 
     size_t size() const
     {
-      return last - first;
+      return d_last - d_first;
     }
 
     private:
-    It first, last;
+    It d_first, d_last;
   };
 
   template<typename Container>
-  auto Head(Container& c, int top)
+  auto Head(Container& i_container, int i_top)
   {
-    return IteratorRange(begin(c),
-                         begin(c) + min<size_t>(max(top, 0), c.size()));
+    return IteratorRange(
+        std::begin(i_container),
+        std::begin(i_container) +
+            std::min<size_t>(std::max(i_top, 0), i_container.size()));
   }
 
 }  // namespace Server_NS

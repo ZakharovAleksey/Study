@@ -1,5 +1,7 @@
 #include "parse.h"
 
+using namespace std;
+
 namespace Server_NS
 {
   string_view Strip(string_view s)

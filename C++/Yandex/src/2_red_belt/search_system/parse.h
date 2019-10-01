@@ -5,14 +5,13 @@
 #include <vector>
 
 #include "iterator_range.h"
-using namespace std;
 
 namespace Server_NS
 {
   template<typename Container>
-  string Join(char c, const Container& cont)
+  std::string Join(char c, const Container& cont)
   {
-    ostringstream os;
+    std::ostringstream os;
     for (const auto& item : Head(cont, cont.size() - 1))
     {
       os << item << c;
@@ -21,6 +20,6 @@ namespace Server_NS
     return os.str();
   }
 
-  string_view Strip(string_view s);
-  vector<string_view> SplitBy(string_view s, char sep);
+  std::string_view Strip(std::string_view s);
+  std::vector<std::string_view> SplitBy(std::string_view s, char sep);
 }  // namespace Server_NS

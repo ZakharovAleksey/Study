@@ -8,33 +8,32 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace Server_NS
 {
   class InvertedIndex {
     public:
-    void Add(const string& document);
-    list<size_t> Lookup(const string& word) const;
+    void Add(const std::string& i_document);
+    std::list<size_t> Lookup(const std::string& i_word) const;
 
-    const string& GetDocument(size_t id) const
+    const std::string& GetDocument(size_t i_id) const
     {
-      return docs[id];
+      return d_docs[i_id];
     }
 
     private:
-    map<string, list<size_t>> index;
-    vector<string> docs;
+    std::map<std::string, std::list<size_t>> d_index;
+    std::vector<std::string> d_docs;
   };
 
   class SearchServer {
     public:
     SearchServer() = default;
-    explicit SearchServer(istream& document_input);
-    void UpdateDocumentBase(istream& document_input);
-    void AddQueriesStream(istream& query_input, ostream& search_results_output);
+    explicit SearchServer(std::istream& i_documentInput);
+    void UpdateDocumentBase(std::istream& i_documentInput);
+    void AddQueriesStream(std::istream& i_queryInput,
+                          std::ostream& i_searchResultsOutput);
 
     private:
-    InvertedIndex index;
+    InvertedIndex d_index;
   };
 }  // namespace Server_NS
