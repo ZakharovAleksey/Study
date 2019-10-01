@@ -11,6 +11,8 @@ using namespace std;
 
 namespace Server_NS
 {
+  const size_t MaxQueryWords = 10u;
+
   vector<string> SplitIntoWords(const string& i_line)
   {
     istringstream words_input(i_line);
@@ -25,75 +27,83 @@ namespace Server_NS
 
   void SearchServer::UpdateDocumentBase(istream& i_documentInput)
   {
-    InvertedIndex new_index;
+    InvertedIndex newIndex;
 
-    for (string current_document; getline(i_documentInput, current_document);)
+    for (string curDoc; getline(i_documentInput, curDoc);)
     {
-      new_index.Add(move(current_document));
+      newIndex.Add(move(curDoc));
     }
 
-    d_index = move(new_index);
+    d_index = move(newIndex);
   }
 
   void SearchServer::AddQueriesStream(istream& i_queryInput,
                                       ostream& i_searchResultsOutput)
   {
+    std::vector<std::string> words;
+    words.reserve(MaxQueryWords);
+
     for (string current_query; getline(i_queryInput, current_query);)
     {
-      const auto words = SplitIntoWords(current_query);
+      words = SplitIntoWords(current_query);
 
-      map<size_t, size_t> docid_count;
+      std::vector<int> docsImportance(d_index.getDocumentCount());
+
       for (const auto& word : words)
-      {
-        for (const size_t docid : d_index.Lookup(word))
-        {
-          docid_count[docid]++;
-        }
-      }
+        for (const size_t docId : d_index.Lookup(word))
+          ++docsImportance[docId];
 
-      vector<pair<size_t, size_t>> search_results(docid_count.begin(),
-                                                  docid_count.end());
-      sort(begin(search_results), end(search_results),
-           [](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
-             int64_t lhs_docid = lhs.first;
-             auto lhs_hit_count = lhs.second;
-             int64_t rhs_docid = rhs.first;
-             auto rhs_hit_count = rhs.second;
-             return make_pair(lhs_hit_count, -lhs_docid) >
-                    make_pair(rhs_hit_count, -rhs_docid);
-           });
+      size_t topCount = std::min(static_cast<int>(docsImportance.size()), 5);
 
       i_searchResultsOutput << current_query << ':';
-      for (auto [docid, hitcount] : Head(search_results, 5))
+      for (size_t id = 0; id < topCount; ++id)
       {
-        i_searchResultsOutput << " {"
-                              << "docid: " << docid << ", "
-                              << "hitcount: " << hitcount << '}';
+        const auto hitCountIter =
+            std::max_element(docsImportance.begin(), docsImportance.end());
+
+        // If there is no more existence of this word in sentence
+        if (*hitCountIter == 0)
+          break;
+
+        i_searchResultsOutput
+            << " {"
+            << "docid: " << std::distance(docsImportance.begin(), hitCountIter)
+            << ", "
+            << "hitcount: " << *hitCountIter << '}';
+
+        *hitCountIter = -1;
       }
       i_searchResultsOutput << endl;
     }
   }
 
-  void InvertedIndex::Add(const string& i_document)
+  InvertedIndex::InvertedIndex()
   {
-    d_docs.push_back(i_document);
-
-    const size_t docid = d_docs.size() - 1;
-    for (const auto& word : SplitIntoWords(i_document))
-    {
-      d_index[word].push_back(docid);
-    }
+    d_index.reserve(MaxWordsCount);
   }
 
-  list<size_t> InvertedIndex::Lookup(const string& i_word) const
+  void InvertedIndex::Add(const string& i_document)
+  {
+    d_docs[d_docsCount] = i_document;
+
+    for (const auto& word : SplitIntoWords(i_document))
+    {
+      d_index[word].emplace_back(d_docsCount);
+    }
+    ++d_docsCount;
+  }
+
+  std::vector<DocId> InvertedIndex::Lookup(const string& i_word) const
   {
     if (auto it = d_index.find(i_word); it != d_index.end())
-    {
       return it->second;
-    } else
-    {
+    else
       return {};
-    }
+  }
+
+  size_t InvertedIndex::getDocumentCount() const
+  {
+    return d_docsCount;
   }
 
 }  // namespace Server_NS
