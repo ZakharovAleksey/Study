@@ -11,6 +11,8 @@ using namespace std;
 
 namespace RedBeltFinal_NS
 {
+  const size_t MaxQueryWords = 10u;
+
   vector<string> SplitIntoWords(const string& i_line)
   {
     istringstream words_input(i_line);
@@ -25,14 +27,14 @@ namespace RedBeltFinal_NS
 
   void SearchServer::UpdateDocumentBase(istream& i_documentInput)
   {
-    InvertedIndex new_index;
+    InvertedIndex newIndex;
 
-    for (string current_document; getline(i_documentInput, current_document);)
+    for (string curDoc; getline(i_documentInput, curDoc);)
     {
-      new_index.Add(move(current_document));
+      newIndex.Add(move(curDoc));
     }
 
-    d_index = move(new_index);
+    d_index = move(newIndex);
   }
 
   void SearchServer::AddQueriesStream(istream& i_queryInput,
@@ -44,6 +46,8 @@ namespace RedBeltFinal_NS
     for (string current_query; getline(i_queryInput, current_query);)
     {
       const auto words = SplitIntoWords(current_query);
+
+      std::vector<int> docsImportance(d_index.getDocumentsCount());
 
       // Clear array
       for (size_t i = 0; i < docCount.size(); ++i)
@@ -79,6 +83,11 @@ namespace RedBeltFinal_NS
       }
       i_searchResultsOutput << endl;
     }
+  }
+
+  InvertedIndex::InvertedIndex()
+  {
+    d_index.reserve(MaxWordsCount);
   }
 
   void InvertedIndex::Add(const string& i_document)
