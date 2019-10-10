@@ -108,7 +108,7 @@ namespace week_3
 
 #pragma endregion
 
-#pragma region  Пишем свой вектор
+#pragma region  Write your own vector
 
 	template <typename T>
 	class SimpleVector {
