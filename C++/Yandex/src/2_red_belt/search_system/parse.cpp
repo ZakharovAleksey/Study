@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace Server_NS
+namespace RedBeltFinal_NS
 {
   string_view Strip(string_view s)
   {
@@ -29,4 +29,4 @@ namespace Server_NS
     return result;
   }
 
-}  // namespace Server_NS
+}  // namespace RedBeltFinal_NS

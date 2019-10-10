@@ -32,5 +32,5 @@ SpaceBeforeRangeBasedForLoopColon: true
 AlwaysBreakTemplateDeclarations: Yes
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortLambdasOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
+# AllowShortIfStatementsOnASingleLine: Never
 NamespaceIndentation: All

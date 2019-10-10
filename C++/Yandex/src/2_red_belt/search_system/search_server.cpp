@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace Server_NS
+namespace RedBeltFinal_NS
 {
   vector<string> SplitIntoWords(const string& i_line)
   {
@@ -38,34 +38,41 @@ namespace Server_NS
   void SearchServer::AddQueriesStream(istream& i_queryInput,
                                       ostream& i_searchResultsOutput)
   {
+    std::vector<std::pair<size_t, size_t>> docCount(
+        d_index.getDocumentsCount());
+
     for (string current_query; getline(i_queryInput, current_query);)
     {
       const auto words = SplitIntoWords(current_query);
 
-      map<size_t, size_t> docid_count;
-      for (const auto& word : words)
+      // Clear array
+      for (size_t i = 0; i < docCount.size(); ++i)
       {
-        for (const size_t docid : d_index.Lookup(word))
-        {
-          docid_count[docid]++;
-        }
+        docCount[i].first = i;
+        docCount[i].second = 0u;
       }
 
-      vector<pair<size_t, size_t>> search_results(docid_count.begin(),
-                                                  docid_count.end());
-      sort(begin(search_results), end(search_results),
-           [](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
-             int64_t lhs_docid = lhs.first;
-             auto lhs_hit_count = lhs.second;
-             int64_t rhs_docid = rhs.first;
-             auto rhs_hit_count = rhs.second;
-             return make_pair(lhs_hit_count, -lhs_docid) >
-                    make_pair(rhs_hit_count, -rhs_docid);
-           });
+      for (const auto& word : words)
+        for (const auto& [docId, wordCount] : d_index.Lookup(word))
+          docCount[docId].second += wordCount;
+
+      const size_t numb = std::min(static_cast<int>(docCount.size()), 5);
+
+      std::partial_sort(std::begin(docCount), std::begin(docCount) + numb,
+                        std::end(docCount),
+                        [](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
+                          int64_t lhs_docid = lhs.first;
+                          auto lhs_hit_count = lhs.second;
+                          int64_t rhs_docid = rhs.first;
+                          auto rhs_hit_count = rhs.second;
+                          return make_pair(lhs_hit_count, -lhs_docid) >
+                                 make_pair(rhs_hit_count, -rhs_docid);
+                        });
 
       i_searchResultsOutput << current_query << ':';
-      for (auto [docid, hitcount] : Head(search_results, 5))
+      for (auto [docid, hitcount] : Head(docCount, 5))
       {
+        if (hitcount == 0) break;
         i_searchResultsOutput << " {"
                               << "docid: " << docid << ", "
                               << "hitcount: " << hitcount << '}';
@@ -76,24 +83,20 @@ namespace Server_NS
 
   void InvertedIndex::Add(const string& i_document)
   {
-    d_docs.push_back(i_document);
+    d_docs[d_docCount] = i_document;
 
-    const size_t docid = d_docs.size() - 1;
     for (const auto& word : SplitIntoWords(i_document))
-    {
-      d_index[word].push_back(docid);
-    }
+      ++d_index[word][d_docCount];
+
+    ++d_docCount;
   }
 
-  list<size_t> InvertedIndex::Lookup(const string& i_word) const
+  std::map<DocId, size_t> InvertedIndex::Lookup(const string& i_word) const
   {
     if (auto it = d_index.find(i_word); it != d_index.end())
-    {
       return it->second;
-    } else
-    {
+    else
       return {};
-    }
   }
 
-}  // namespace Server_NS
+}  // namespace RedBeltFinal_NS
