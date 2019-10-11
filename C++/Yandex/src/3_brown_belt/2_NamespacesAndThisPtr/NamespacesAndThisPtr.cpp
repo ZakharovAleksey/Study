@@ -52,12 +52,10 @@ namespace BrownBeltWeek2
 
 #pragma region Dual scheduling
 
-  bool Collide(const GameObject& first, const GameObject& second)
+  /*bool Collide(const GameObject& first, const GameObject& second)
   {
     return first.Collide(second);
   }
-
-#define DEFINE_METHOD_COLLIDE_WITH(First, Second)
 
 #define DEFINE_METHODS(Type)                                                   \
   bool Type::CollideWith(const Unit& that) const                               \
@@ -77,7 +75,11 @@ namespace BrownBeltWeek2
     return geo2d::Collide(d_pos, that.getPos());                               \
   }
 
-  // DEFINE_METHODS(Unit);
+  DEFINE_METHODS(Unit);
+  DEFINE_METHODS(Building);
+  DEFINE_METHODS(Tower);
+  DEFINE_METHODS(Fence);*/
+
 #pragma endregion
 
 }  // namespace BrownBeltWeek2
