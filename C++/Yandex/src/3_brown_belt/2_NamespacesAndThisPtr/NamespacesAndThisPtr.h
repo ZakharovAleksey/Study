@@ -51,8 +51,8 @@ namespace BrownBeltWeek2
   //#define DECLARE_METHODS \
 //  bool CollideWith(const Unit& that) const override; \
 //  bool CollideWith(const Building& that) const; \
-//  bool CollideWith(const Tower& that) const; \ bool CollideWith(const Fence&
-  //  that) const;
+//  bool CollideWith(const Tower& that) const; \ bool CollideWith(const
+  //  Fence& that) const;
   //
   //  // CRTP Idiom:
   //  // https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
@@ -130,6 +130,62 @@ namespace BrownBeltWeek2
   //  };
   //
   //  bool Collide(const GameObject& first, const GameObject& second);
+
+#pragma endregion
+
+#pragma region Comments Server
+
+  enum class HttpCode
+  {
+    Ok = 200,
+    NotFound = 404,
+    Found = 302,
+  };
+
+  using Message = std::string;
+
+  class HttpResponse {
+    public:
+    using HeadersMap = std::multimap<std::string, std::string>;
+    explicit HttpResponse(HttpCode code) : d_code(code) {}
+
+    HttpResponse& AddHeader(std::string i_name, std::string i_value);
+    HttpResponse& SetContent(std::string i_content);
+    HttpResponse& SetCode(HttpCode i_code);
+
+    friend std::ostream& operator<<(std::ostream& io_os,
+                                    const HttpResponse& i_resp);
+
+    inline static const std::unordered_map<HttpCode, std::string> HttpComment{
+      { HttpCode::Ok, "OK" },
+      { HttpCode::NotFound, "Not found" },
+      { HttpCode::Found, "Found" }
+    };
+
+    private:
+    HttpCode d_code;
+    HeadersMap d_headers;
+    std::string d_content;
+  };
+
+  // std::ostream& operator<<(std::ostream& io_os, const HttpResponse& i_resp)
+  //{
+  //  // Print the top line
+  //  io_os << "HTTP/1.1 " << static_cast<int>(i_resp.d_code) << ' '
+  //        << HttpResponse::HttpComment.at(i_resp.d_code) << '\n';
+
+  //  // Print all headers
+  //  for (const auto& [header, value] : i_resp.d_headers)
+  //    io_os << header << ": " << value << '\n';
+
+  //  // Skip the line
+  //  io_os << '\n';
+
+  //  // Print the content
+  //  io_os << i_resp.d_content;
+
+  //  return io_os;
+  //}
 
 #pragma endregion
 

@@ -82,4 +82,51 @@ namespace BrownBeltWeek2
 
 #pragma endregion
 
+  HttpResponse& HttpResponse::AddHeader(std::string i_name, std::string i_value)
+  {
+    d_headers.insert({ std::move(i_name), std::move(i_value) });
+    return *this;
+  }
+
+  HttpResponse& HttpResponse::SetContent(std::string i_content)
+  {
+    d_content = std::move(i_content);
+
+    if (!d_content.empty())
+    {
+      // There can be only one "Content-Length" header
+      if (auto iter = d_headers.find("Content-Length"); iter != d_headers.end())
+        iter->second = std::to_string(d_content.size());
+      else
+        // return AddHeader("Content-Length", to_string(d_content.size()));
+        d_headers.insert(
+            { "Content-Length", std::to_string(d_content.size()) });
+    }
+    return *this;
+  }
+  HttpResponse& HttpResponse::SetCode(HttpCode i_code)
+  {
+    d_code = i_code;
+    return *this;
+  }
+
+  std::ostream& operator<<(std::ostream& io_os, const HttpResponse& i_resp)
+  {
+    // Print the top line
+    io_os << "HTTP/1.1 " << static_cast<int>(i_resp.d_code) << ' '
+          << HttpResponse::HttpComment.at(i_resp.d_code) << '\n';
+
+    // Print all headers
+    for (const auto& [header, value] : i_resp.d_headers)
+      io_os << header << ": " << value << '\n';
+
+    // Skip the line
+    io_os << '\n';
+
+    // Print the content
+    io_os << i_resp.d_content;
+
+    return io_os;
+  }
+
 }  // namespace BrownBeltWeek2
