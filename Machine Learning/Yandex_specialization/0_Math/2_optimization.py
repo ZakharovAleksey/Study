@@ -120,25 +120,9 @@ def not_grad_descent(func, p_start, p_storage, d=1e-3, eps=1e-3, max_iter=1e4):
 from numpy.linalg import svd, matrix_rank, norm
 
 if __name__ == '__main__':
-
-    A = np.array([[3, 1, 4, 2, 5], [2, 0, 2, 2, 4], [1, 1, 2, 0, 1]],
-                 dtype=float)
-    U, D, Vt = svd(A)
-    print(matrix_rank(A))
-    print(D)
-
-    print(U)
-    n = 1
-    u = U[:, :n]
-    d = np.diag(D[:n])
-    vt = Vt[:n, :]
-
-    print('____' * 8)
-    print(A)
-    print(u.dot(d.dot(vt)))
-    print(norm(A - u.dot(d.dot(vt))))
-
-    print('LOL')
+    p1 = np.array([0.49, 0.38, 0.1, 0.03])
+    p2 = np.array([1., 0.5, 0.5, 0.25])
+    print(np.sum(p1 * p2))
 
     # max_val = 6.
     # vals = np.arange(-max_val, max_val, 0.01)
