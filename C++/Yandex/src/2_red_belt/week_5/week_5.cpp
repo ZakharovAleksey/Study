@@ -1,3 +1,4 @@
+
 #include "week_5.h"
 
 #include <sstream>
@@ -20,8 +21,7 @@ namespace RedBeltW5_NS
 
   Stats ExploreLine(const set<string>& key_words, const std::string& line)
   {
-    if (line.empty())
-      return {};
+    if (line.empty()) return {};
 
     Stats res;
     size_t wordLength{ 0u }, beginId{ 0u }, endId{ 0u };
@@ -33,8 +33,7 @@ namespace RedBeltW5_NS
     for (; !isLastWord && beginId < line.size();)
     {
       endId = line.find(' ', beginId);
-      if (endId == std::string::npos)
-        isLastWord = true;
+      if (endId == std::string::npos) isLastWord = true;
 
       wordLength = endId - beginId;
       if (wordLength >= 1)
