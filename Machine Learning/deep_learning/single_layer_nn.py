@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 from scipy.special import expit
-from sklearn.datasets import make_moons
+
 from sklearn.metrics import (accuracy_score, roc_auc_score)
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+
+import common_utils.my_datasets as my_ds
+from common_utils.visualization import plot_scatter_with_decision_boundary
+from common_utils.activations import *
 
 RANDOM_STATE = 1
 np.random.seed(RANDOM_STATE)
@@ -48,10 +50,8 @@ class SingleLayerClassificationNN:
 
         # Hidden layers & activation functions
         self.layers = [None, None]
-        self.act_func = [lambda x: np.tanh(x), lambda x: expit(x)]
-        self.act_grads = [
-            lambda x: 1. - np.tanh(x)**2, lambda x: expit(x) * (1. - expit(x))
-        ]
+        self.act_func = [tanh, sigmoid]
+        self.act_grads = [tanh_der, sigmoid_der]
 
     def __set_dimentions(self, X_train: np.array, y_train: np.array):
         (n_features, n_samples0) = X_train.shape
@@ -127,41 +127,14 @@ class SingleLayerClassificationNN:
         return res > self.threshold
 
 
-def plot_decision_boundary(model, X, y):
-    # Set min and max values and give it some padding
-    x_min, x_max = X[0, :].min() - 1, X[0, :].max() + 1
-    y_min, y_max = X[1, :].min() - 1, X[1, :].max() + 1
-    h = 0.01
-    # Generate a grid of points with distance h between them
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                         np.arange(y_min, y_max, h))
-    # Predict the function value for the whole grid
-    Z = model(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
-    # Plot the contour and training examples
-    plt.contourf(xx, yy, Z, cmap=plt.cm.Spectral)
-    plt.ylabel('x2')
-    plt.xlabel('x1')
-    plt.scatter(X[0, :], X[1, :], c=y, cmap=plt.cm.Spectral)
-
-
 if __name__ == "__main__":
+    X_train, X_test, y_train, y_test = my_ds.my_moon_dataset()
     clf = SingleLayerClassificationNN(n_hidden=4, learinig_rate=0.05)
-    X, y = make_moons(random_state=1, noise=0.3)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, train_size=0.65, random_state=RANDOM_STATE)
 
     clf.fit(X_train.T, y_train[:, np.newaxis].T)
-
-    fig = plt.figure(figsize=(9, 8))
-    ax = plt.subplot(221)
-    ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, s=50, edgecolor='k')
-    plot_decision_boundary(lambda x: clf.predict(x.T), X_train.T, y_train)
-
     y_pred = clf.predict(X_test.T)
 
     print(f'Accuracy: {accuracy_score(y_test, y_pred.T)}')
     print(f'AUC ROC: {roc_auc_score(y_test, y_pred.T)}')
 
-    plt.show()
+    plot_scatter_with_decision_boundary(clf, X_train, y_train)
