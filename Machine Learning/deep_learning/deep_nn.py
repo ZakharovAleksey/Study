@@ -13,6 +13,13 @@ np.random.seed(RANDOM_STATE)
 
 
 class Layer:
+
+    WEIGHTS_COEF = {
+        LayerType.RELU: lambda denominator: np.sqrt(2. / denominator),
+        LayerType.SIGM: lambda denominator: 1. / np.sqrt(denominator),
+        LayerType.TANH: lambda denominator: np.sqrt(2. / denominator),
+    }
+
     def __init__(self,
                  layer_id: int,
                  n_previous: int,
@@ -24,7 +31,8 @@ class Layer:
         self.type = type
         self.act, self.act_der = ACTIVATIONS[self.type]
 
-        self.W = np.random.randn(n_current, n_previous) * 0.01
+        self.W = np.random.randn(n_current, n_previous) * \
+            self.__calc_weight_coef(n_previous, n_current)
         self.dW = None
         self.b = np.zeros((n_current, 1))
         self.db = None
@@ -38,6 +46,18 @@ class Layer:
         self.A_prev = None
 
         self.dpt_mask = None
+
+    def __calc_weight_coef(self, n_previous: int, n_current: int) -> float:
+        """
+            Returns "normalization" coefficient for initial weights, 
+            depending on the type of neurons in the layer.
+            Note: each neuron type has its own coefficient for better SGD convergence
+        """
+        coef_func = self.WEIGHTS_COEF[self.type]
+        if self.type in [LayerType.RELU, LayerType.TANH]:
+            return coef_func(n_previous)
+        else:
+            return coef_func(n_previous + n_current)
 
     def forward(self, A_prev: np.array) -> np.array:
         """
@@ -236,15 +256,14 @@ class NeuralNetwork:
 
 
 if __name__ == "__main__":
-
     X_train, X_test, y_train, y_test = my_ds.my_moon_dataset()
     layer_dims = [X_train.shape[1], 5, 3, 1]
 
     clf = NeuralNetwork(layer_dims,
                         0.05,
-                        10000,
+                        20000,
                         LayerType.TANH,
-                        regularization_coef=0.01,
+                        regularization_coef=0.05,
                         use_dropout=False)
 
     clf.fit(X_train.T, y_train[:, np.newaxis].T)
