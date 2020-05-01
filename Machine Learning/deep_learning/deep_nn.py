@@ -13,19 +13,17 @@ np.random.seed(RANDOM_STATE)
 
 
 class Layer:
-
+    """
+        Class represents a single layer in NN.
+    """
     WEIGHTS_COEF = {
         LayerType.RELU: lambda denominator: np.sqrt(2. / denominator),
         LayerType.SIGM: lambda denominator: 1. / np.sqrt(denominator),
         LayerType.TANH: lambda denominator: np.sqrt(2. / denominator),
     }
 
-    def __init__(self,
-                 layer_id: int,
-                 n_previous: int,
-                 n_current: int,
-                 type: LayerType = LayerType.RELU,
-                 random_state: int = 1):
+    def __init__(self, layer_id: int, n_previous: int, n_current: int, \
+        type: LayerType = LayerType.RELU, random_state: int = 1):
         np.random.seed(random_state)
         self.id = layer_id
         self.type = type
@@ -70,10 +68,10 @@ class Layer:
         self.Z_cur = self.W.dot(A_prev) + self.b
         return self.act(self.Z_cur)
 
-    def backward(self, dA_next: np.array, n_objects: int,
-                 use_regularization: bool, reg_coef: float) -> np.array:
+    def backward(self, dA_next: np.array, n_objects: int, use_regularization: bool, \
+        reg_coef: float, cur_epoch: int) -> np.array:
         """
-            Bockward step for layer:
+            Backward step for layer:
             1. dZ = dA * activation_deriviative(Z)
             2. dW = (dZ * A_prev) / m
             3. db = sum(dZ, axis=1) / m
@@ -117,6 +115,96 @@ class Layer:
         return self.dpt_mask
 
 
+class AdamLayer(Layer):
+    """
+        Class represents a single layer of neurons in NN.
+        For Gradient Decsent (GD) this class use Adam algorithm:
+        https://towardsdatascience.com/adam-latest-trends-in-deep-learning-optimization-6be9a291375c
+    """
+    def __init__(self, layer_id: int, n_previous: int, n_current: int, \
+        type: LayerType = LayerType.RELU, beta0: float = 0.9, beta1: float = 0.999, random_state: int = 1):
+        Layer.__init__(self, layer_id, n_previous, n_current, type,
+                       random_state)
+        self.beta0 = beta0
+        self.beta1 = beta1
+        # This epsilon is needed to prevent division by zero
+        self.eps = 1e-8
+
+        # Get the dimentions of W and b
+        w_nx, w_ny = self.W.shape
+        b_nx, b_ny = self.b.shape
+
+        # First momentum for Gradient Gescent
+        self.V_dw = np.zeros((w_nx, w_ny))
+        self.V_db = np.zeros((b_nx, b_ny))
+        # Bias-corrected first momentum for Gradient Gescent
+        self.V_dw_corr = np.zeros((w_nx, w_ny))
+        self.V_db_corr = np.zeros((b_nx, b_ny))
+
+        # Second momentum for Gradient Gescent (RMSprop)
+        self.S_dw = np.zeros((w_nx, w_ny))
+        self.S_db = np.zeros((b_nx, b_ny))
+        # Bias-corrected second momentum for Gradient Gescent (RMSprop)
+        self.S_dw_corr = np.zeros((w_nx, w_ny))
+        self.S_db_corr = np.zeros((b_nx, b_ny))
+
+    def __calc_momentum_coef(self, coef: np.array, grads: np.array,
+                             cur_epoch: int):
+        """
+            This functions calculates bias-corrected first momentum for 
+            input gradient (moment)
+        """
+        coef = self.beta0 * coef + (1. - self.beta0) * grads
+        return coef, coef / (1. - self.beta0**cur_epoch)
+
+    def __calc_rmsprop_coef(self, coef: np.array, grads: np.array,
+                            cur_epoch: int):
+        """
+            This functions calculates bias-corrected second momentum for 
+            input gradient (RMSprop)
+        """
+        coef = self.beta1 * coef + (1. - self.beta1) * grads**2
+        return coef, coef / (1. - self.beta1**cur_epoch)
+
+    def backward(self, dA_next: np.array, n_objects: int, use_regularization: bool, \
+        reg_coef: float, cur_epoch: int) -> np.array:
+        """
+            Backward step for layer:
+            1. dZ = dA * activation_deriviative(Z)
+            2. dW = (dZ * A_prev) / m
+            3. db = sum(dZ, axis=1) / m
+            4. Calculate bias-corrected first momentum coefs
+            5. Calculate bias-corrected second momentum coefs
+        """
+        dA_cur = Layer.backward(self, dA_next, n_objects, use_regularization,
+                                reg_coef, cur_epoch)
+
+        # Calculate current "weights" for momenum
+        self.V_dw = self.beta0 * self.V_dw + (1. - self.beta0) * self.dW
+        self.V_db = self.beta0 * self.V_db + (1. - self.beta0) * self.db
+
+        self.V_dw_corr = self.V_dw / (1. - self.beta0**cur_epoch)
+        self.V_db_corr = self.V_db / (1. - self.beta0**cur_epoch)
+
+        # Calculate current "weights" for RMSprop
+        self.S_dw = self.beta1 * self.S_dw + (1. - self.beta1) * self.dW**2
+        self.S_db = self.beta1 * self.S_db + (1. - self.beta1) * self.db**2
+
+        self.S_dw_corr = self.S_dw / (1. - self.beta1**cur_epoch)
+        self.S_db_corr = self.S_db / (1. - self.beta1**cur_epoch)
+
+        return dA_cur
+
+    def update_weight(self, learning_rate: float):
+        """
+            Update weights in accordace with corrected Adam coefficients
+        """
+        self.W = self.W - learning_rate * \
+            self.V_dw_corr / (np.sqrt(self.S_dw_corr) + self.eps)
+        self.b = self.b - learning_rate * \
+            self.V_db_corr / (np.sqrt(self.S_db_corr) + self.eps)
+
+
 # Direction of propagation
 class PropType(IntEnum):
     FORWARD = 0,
@@ -124,29 +212,51 @@ class PropType(IntEnum):
 
 
 class NeuralNetwork:
+    """
+        This is my naive implementation of NN:
+
+    """
     def __init__(self,
-                 layer_dims: list,
-                 learning_rate: float,
-                 max_epoch: int,
-                 hidden_type: LayerType = LayerType.RELU,
-                 regularization_coef: float = 0.,
-                 use_dropout: bool = False):
+                 layer_dims: list,                          # Layer dimentions
+                 learning_rate: float,                      # Start learning rate
+                 max_epoch: int,                            # Max number of epochs
+                 hidden_type: LayerType = LayerType.RELU,   # Type of hidden layers
+                 regularization_coef: float = 0.,           # Regularization coef
+                 use_dropout: bool = False,                 # Use dropout or not
+                 use_adam: bool = False,                    # Use Adam GD algorithm or not
+                 use_adaptive_lr: bool = False \
+        ):
         self.n_layers = len(layer_dims) - 1
         self.n_hidden = self.n_layers - 1
+        self.adaptive_lr = use_adaptive_lr
         self.lr = learning_rate
         self.max_epoch = max_epoch
         self.h_type = hidden_type
         self.threshold = 0.5
 
         # Initilalize hidden layers
-        self.layers = [
-            Layer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type,
-                  RANDOM_STATE) for ID in range(1, self.n_layers)
-        ]
+        if use_adam:
+            self.layers = [
+                AdamLayer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type, \
+                    0.9, 0.999, RANDOM_STATE) for ID in range(1, self.n_layers)
+            ]
+        else:
+            self.layers = [
+                Layer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type, \
+                    RANDOM_STATE) for ID in range(1, self.n_layers)
+            ]
+
         # Output layer is SIGM for classification problem
-        self.layers.append(
-            Layer(self.n_layers, layer_dims[self.n_layers - 1],
-                  layer_dims[self.n_layers], LayerType.SIGM, RANDOM_STATE))
+        if use_adam:
+            self.layers.append(
+                AdamLayer(self.n_layers, layer_dims[self.n_layers - 1], \
+                    layer_dims[self.n_layers], LayerType.SIGM, 0.9, 0.999, RANDOM_STATE)
+            )
+        else:
+            self.layers.append(
+                Layer(self.n_layers, layer_dims[self.n_layers - 1], \
+                    layer_dims[self.n_layers], LayerType.SIGM, RANDOM_STATE)
+            )
 
         # Regularization parameters
         self.rc = regularization_coef
@@ -197,6 +307,10 @@ class NeuralNetwork:
         """
             Loss calculation
         """
+        # Handle values close to 0 and 1 (log(0) -> inf)
+        A_last[A_last == 0] = 1e-6
+        A_last[A_last == 1] = 0.999
+        # Calculate loss
         log_loss = Y * np.log(A_last) + (1. - Y) * np.log(1. - A_last)
         loss = -np.sum(log_loss) / n_obj
 
@@ -206,14 +320,16 @@ class NeuralNetwork:
 
         return loss
 
-    def _backward_propagation(self, A_last: np.array, Y: np.array, n_obj: int):
+    def _backward_propagation(self, A_last: np.array, Y: np.array, n_obj: int,
+                              cur_epoch: int):
         """
             Backward propagation step for NN
         """
         dAL = -(np.divide(Y, A_last) - np.divide(1 - Y, 1 - A_last))
 
         for ID in reversed(range(self.n_layers)):
-            dAL = self.layers[ID].backward(dAL, n_obj, self.use_reg, self.rc)
+            dAL = self.layers[ID].backward(dAL, n_obj, self.use_reg, self.rc,
+                                           cur_epoch)
 
             # Use the same dropdown masks for all layers but 1
             if self.use_dpt and self.layers[ID].id != 1:
@@ -221,12 +337,16 @@ class NeuralNetwork:
                 dAL = self.__dropout_activation(self.layers[ID - 1], dAL,
                                                 PropType.BACKWARD)
 
-    def _update_weights(self):
+    def _update_weights(self, cur_epoch):
         """
             Layers weights update after backpropagation
         """
+        cur_lr = self.lr
+        if self.adaptive_lr:
+            cur_lr /= np.sqrt(cur_epoch)
+
         for layer in self.layers:
-            layer.update_weight(self.lr)
+            layer.update_weight(cur_lr)
 
     def fit(self, X_train: np.array, y_train: np.array):
         """
@@ -235,14 +355,15 @@ class NeuralNetwork:
         assert X_train.shape[0] == self.layers[0].W.shape[1]
 
         n_objects = X_train.shape[1]
-        for ID in range(self.max_epoch):
+        for cur_epoch in range(1, self.max_epoch + 1):
             A_last = self._forward_propagation(X_train, self.use_dpt)
             loss = self._calculate_loss(A_last, y_train, n_objects)
-            self._backward_propagation(A_last, y_train, n_objects)
-            self._update_weights()
+            # print(loss)
+            self._backward_propagation(A_last, y_train, n_objects, cur_epoch)
+            self._update_weights(cur_epoch)
 
-            if ID % 1000 == 0:
-                print(f'{ID}: {round(loss, 4)}')
+            if cur_epoch % 100 == 0:
+                print(f'Epoch {cur_epoch/1000}k: {round(loss, 6)}')
 
     def predict(self, X_test: np.array) -> np.array:
         """
@@ -260,11 +381,13 @@ if __name__ == "__main__":
     layer_dims = [X_train.shape[1], 5, 3, 1]
 
     clf = NeuralNetwork(layer_dims,
-                        0.05,
-                        20000,
+                        0.5,
+                        2000,
                         LayerType.TANH,
-                        regularization_coef=0.05,
-                        use_dropout=False)
+                        regularization_coef=0.08,
+                        use_dropout=False,
+                        use_adam=True,
+                        use_adaptive_lr=True)
 
     clf.fit(X_train.T, y_train[:, np.newaxis].T)
     y_pred = clf.predict(X_test.T)
