@@ -32,13 +32,15 @@ class NeuralNetwork:
                  layer_dims: list,                          # Layer dimentions
                  learning_rate: float,                      # Start learning rate
                  max_epoch: int,                            # Max number of epochs
+                 batch_size: int,                           # Number of objects in the training batch
                  hidden_type: LayerType = LayerType.RELU,   # Type of hidden layers
                  regularization_coef: float = 0.,           # Regularization coef
                  use_dropout: bool = False,                 # Use dropout or not
                  use_adam: bool = False,                    # Use Adam GD algorithm or not
                  beta0: float = 0.9,                        # Adam GD first momentum coef
                  beta1: float = 0.999,                      # Adam GD second momentum coef
-                 use_adaptive_lr: bool = False \
+                 use_adaptive_lr: bool = False,             # Flag for adpative learning rate usage
+                 random_state: int = 1 \
         ):
         self.n_layers = len(layer_dims) - 1
         self.n_hidden = self.n_layers - 1
@@ -47,6 +49,7 @@ class NeuralNetwork:
         self.max_epoch = max_epoch
         self.h_type = hidden_type
         self.threshold = 0.5
+        self.batch_size = batch_size
 
         # Initialize parameters for Adam GD
         self.use_adam = use_adam
@@ -155,19 +158,67 @@ class NeuralNetwork:
         for layer in self.layers:
             layer.update_weight(cur_lr)
 
+    def __split_on_batches(self, X_train: np.array, y_train: np.array):
+        """
+            Splits input traininig data of batches
+        """
+
+        n_obj = X_train.shape[1]
+        # In case we have only one batch
+        if self.batch_size >= n_obj:
+            self.batch_size = n_obj
+            return X_train
+        # In case we have several batches
+
+        # Determine number of batches
+        n_batches = 0
+        if n_obj / self.batch_size == 0:
+            n_batches = int(n_obj / self.batch_size)
+            return np.split(X_train, n_batches, axis=0), \
+                np.split(y_train, n_batches, axis=0)
+        else:
+            n_batches = int(np.floor(n_obj / self.batch_size))
+            last_id = n_batches * self.batch_size
+            # Split X_train on batches
+            X_batches = np.split(X_train[:, :last_id], n_batches, axis=1)
+            X_batches.append(X_train[:, last_id:])
+            # Split y_train on batches
+            y_batches = np.split(y_train[:, :last_id], n_batches, axis=1)
+            y_batches.append(y_train[:, last_id:])
+
+            return X_batches, y_batches
+
+    def _run_one_epoch(self, cur_epoch: int, X_train: np.array,
+                       y_train: np.array, n_obj: int):
+        """
+            Runs single training epoch for input training data
+        """
+        A_last = self._forward_propagation(X_train, self.use_dpt)
+        loss = self._calculate_loss(A_last, y_train, n_obj)
+        self._backward_propagation(A_last, y_train, n_obj, cur_epoch)
+        self._update_weights(cur_epoch)
+        return loss
+
     def fit(self, X_train: np.array, y_train: np.array):
         """
             Functions which fits the model
         """
         assert X_train.shape[0] == self.layers[0].W.shape[1]
 
-        n_objects = X_train.shape[1]
+        X_list, y_list = self.__split_on_batches(X_train, y_train)
+
         for cur_epoch in range(1, self.max_epoch + 1):
-            A_last = self._forward_propagation(X_train, self.use_dpt)
-            loss = self._calculate_loss(A_last, y_train, n_objects)
-            # print(loss)
-            self._backward_propagation(A_last, y_train, n_objects, cur_epoch)
-            self._update_weights(cur_epoch)
+            loss = 0.
+            # Model training on single batch
+            if not isinstance(X_list, list):
+                n_obj = X_train.shape[1]
+                loss = self._run_one_epoch(cur_epoch, X_train, y_train, n_obj)
+            # Model training on the list of batches
+            else:
+                for X, y in zip(X_list, y_list):
+                    n_obj = X.shape[1]
+                    loss += self._run_one_epoch(cur_epoch, X, y, n_obj)
+                loss /= len(X_list)
 
             if cur_epoch % 100 == 0:
                 print(f'Epoch {cur_epoch/1000}k: {round(loss, 6)}')
@@ -190,6 +241,7 @@ if __name__ == "__main__":
     clf = NeuralNetwork(layer_dims,
                         0.5,
                         2000,
+                        10,
                         LayerType.TANH,
                         regularization_coef=0.08,
                         use_dropout=False,
