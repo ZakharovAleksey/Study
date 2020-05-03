@@ -12,7 +12,7 @@ from common_utils.visualization import plot_scatter_with_decision_boundary
 
 from common_utils.activations import *
 
-from nn_layer import Layer, AdamLayer
+from nn_layer import Layer
 RANDOM_STATE = 1
 np.random.seed(RANDOM_STATE)
 
@@ -36,6 +36,8 @@ class NeuralNetwork:
                  regularization_coef: float = 0.,           # Regularization coef
                  use_dropout: bool = False,                 # Use dropout or not
                  use_adam: bool = False,                    # Use Adam GD algorithm or not
+                 beta0: float = 0.9,                        # Adam GD first momentum coef
+                 beta1: float = 0.999,                      # Adam GD second momentum coef
                  use_adaptive_lr: bool = False \
         ):
         self.n_layers = len(layer_dims) - 1
@@ -46,35 +48,28 @@ class NeuralNetwork:
         self.h_type = hidden_type
         self.threshold = 0.5
 
-        # Initilalize hidden layers
-        if use_adam:
-            self.layers = [
-                AdamLayer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type, \
-                    0.9, 0.999, RANDOM_STATE) for ID in range(1, self.n_layers)
-            ]
-        else:
-            self.layers = [
-                Layer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type, \
-                    RANDOM_STATE) for ID in range(1, self.n_layers)
-            ]
+        # Initialize parameters for Adam GD
+        self.use_adam = use_adam
+        self.beta0 = beta0
+        self.beta1 = beta1
 
-        # Output layer is SIGM for classification problem
-        if use_adam:
-            self.layers.append(
-                AdamLayer(self.n_layers, layer_dims[self.n_layers - 1], \
-                    layer_dims[self.n_layers], LayerType.SIGM, 0.9, 0.999, RANDOM_STATE)
-            )
-        else:
-            self.layers.append(
-                Layer(self.n_layers, layer_dims[self.n_layers - 1], \
-                    layer_dims[self.n_layers], LayerType.SIGM, RANDOM_STATE)
+        # Initialize NN layers
+        self.layers = [
+            Layer(ID, layer_dims[ID - 1], layer_dims[ID], self.h_type, \
+            self.use_adam, self.beta0, self.beta1, RANDOM_STATE)
+            for ID in range(1, self.n_layers)
+        ]
+
+        self.layers.append(
+                Layer(self.n_layers, layer_dims[self.n_layers - 1], layer_dims[self.n_layers], \
+                    LayerType.SIGM, self.use_adam, self.beta0, self.beta1, RANDOM_STATE)
             )
 
-        # Regularization parameters
+        # Initialize L2 regularization parameters
         self.rc = regularization_coef
         self.use_reg = self.rc != 0.
 
-        # Dropout parameters
+        # Initialize dropout parameters
         self.use_dpt = use_dropout
         self.dpt_thresh = 0.5
 
